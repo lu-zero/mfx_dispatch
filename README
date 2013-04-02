@@ -1,0 +1,6 @@
+Autotooled version of the opensource Intel media sdk dispatcher.
+
+Currently only windows support is provided, the package is made just to
+ease the testing of the QuickSync support in Libav.
+
+
