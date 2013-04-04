@@ -28,7 +28,6 @@ File Name: mfx_dxva2_device.cpp
 
 \* ****************************************************************************** */
 
-#include <iostream>
 #include <sstream>
 
 #define INITGUID
@@ -77,7 +76,7 @@ mfxU32 DXDevice::GetDeviceID(void) const
 mfxU64 DXDevice::GetDriverVersion(void) const
 {
     return m_driverVersion;
-    
+
 }// mfxU64 DXDevice::GetDriverVersion(void) const
 
 mfxU64 DXDevice::GetLUID(void) const

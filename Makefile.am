@@ -18,6 +18,7 @@ libmfx_la_SOURCES = \
         src/mfx_win_reg_key.cpp
 
 libmfx_la_LDFLAGS = -version-info $(MFX_LT_CURRENT):$(MFX_LT_REVISION):$(MFX_LT_AGE)
+libmfx_la_LIBADD = -lsupc++
 
 pkginclude_HEADERS = \
 	include/mfx_critical_section.h       \
