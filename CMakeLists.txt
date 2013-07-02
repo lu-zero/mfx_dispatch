@@ -2,14 +2,8 @@ project( libmfx )
 
 find_path ( INTELMEDIASDK_PATH mfx/mfxvideo.h
   HINTS "${CMAKE_SOURCE_DIR}/include"
-  # ENV INTELMEDIASDK_PATH
-  )
-
-if (INTELMEDIASDK_PATH)
-  message("Intel Media SDK include folder found ! (${INTELMEDIASDK_PATH})")
-else (INTELMEDIASDK_PATH)
-  message(FATAL_ERROR "Intel Media SDK include folder required, but not found !")
-endif (INTELMEDIASDK_PATH)
+  HINTS "${CMAKE_SOURCE_DIR}/mfx"
+)
 
 set(SOURCES
   src/main.cpp
@@ -24,7 +18,6 @@ set(SOURCES
 )
 
 include_directories(
-  ${INTELMEDIASDK_PATH}
   include
 )
 
@@ -41,9 +34,8 @@ configure_file (${CMAKE_SOURCE_DIR}/libmfx.pc ${CMAKE_BINARY_DIR}/libmfx.pc @ONL
 
 
 add_library( mfx STATIC ${SOURCES} )
-install (FILES ${CMAKE_SOURCE_DIR}/include/mfx_dispatcher.h
-  ${CMAKE_SOURCE_DIR}/include/mfx_dispatcher.h
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
+install (FILES ${CMAKE_SOURCE_DIR}/mfx/*
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/mfx)
 install (FILES ${CMAKE_BINARY_DIR}/libmfx.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 install (TARGETS mfx ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 cmake_minimum_required(VERSION 2.6)
