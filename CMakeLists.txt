@@ -30,8 +30,7 @@ add_definitions(
   -D_LIB
 )
 
-configure_file (${CMAKE_SOURCE_DIR}/libmfx.pc ${CMAKE_BINARY_DIR}/libmfx.pc @ONLY)
-
+configure_file (${CMAKE_SOURCE_DIR}/libmfx.pc.cmake ${CMAKE_BINARY_DIR}/libmfx.pc @ONLY)
 
 add_library( mfx STATIC ${SOURCES} )
 install (FILES ${CMAKE_SOURCE_DIR}/mfx/*

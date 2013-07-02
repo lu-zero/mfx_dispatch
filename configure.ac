@@ -1,8 +1,8 @@
 AC_PREREQ([2.53])
 
-AC_INIT([libmfx], [0])
+AC_INIT([libmfx], [1.7])
 AC_CONFIG_SRCDIR([src/mfx_dispatcher.cpp])
-AM_INIT_AUTOMAKE([1.6 foreign])
+AM_INIT_AUTOMAKE([foreign])
 
 
 AC_CANONICAL_HOST
@@ -22,5 +22,6 @@ LT_INIT
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_OUTPUT([
+libmfx.pc
 Makefile
 ])

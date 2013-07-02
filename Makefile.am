@@ -28,6 +28,9 @@ libmfx_la_SOURCES = \
 libmfx_la_LDFLAGS = -version-info $(MFX_LT_CURRENT):$(MFX_LT_REVISION):$(MFX_LT_AGE)
 libmfx_la_LIBADD = -lsupc++
 
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA = libmfx.pc
+
 pkginclude_HEADERS = \
 	mfx/mfxdefs.h                    \
 	mfx/mfxplugin.h                  \
