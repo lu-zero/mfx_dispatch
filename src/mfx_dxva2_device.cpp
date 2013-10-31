@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -28,9 +28,13 @@ File Name: mfx_dxva2_device.cpp
 
 \* ****************************************************************************** */
 
+#include <iostream>
 #include <sstream>
 
+#if defined(_WIN32) || defined(_WIN64)
+
 #define INITGUID
+#include <d3d9.h>
 #include <dxgi.h>
 
 #include "mfx_dxva2_device.h"
@@ -76,7 +80,7 @@ mfxU32 DXDevice::GetDeviceID(void) const
 mfxU64 DXDevice::GetDriverVersion(void) const
 {
     return m_driverVersion;
-
+    
 }// mfxU64 DXDevice::GetDriverVersion(void) const
 
 mfxU64 DXDevice::GetLUID(void) const
@@ -128,6 +132,155 @@ void DXDevice::UnloadDLLModule(void)
     }
 
 } // void DXDevice::UnloaDLLdModule(void)
+
+
+D3D9Device::D3D9Device(void)
+{
+    m_pD3D9 = (void *) 0;
+    m_pD3D9Ex = (void *) 0;
+
+} // D3D9Device::D3D9Device(void)
+
+D3D9Device::~D3D9Device(void)
+{
+    Close();
+
+} // D3D9Device::~D3D9Device(void)
+
+void D3D9Device::Close(void)
+{
+    // release the interfaces
+    if (m_pD3D9Ex)
+    {
+        ((IDirect3D9Ex *) m_pD3D9Ex)->Release();
+    }
+
+    // release the interfaces
+    if (m_pD3D9)
+    {
+        ((IDirect3D9 *) m_pD3D9)->Release();
+    }
+
+    m_pD3D9 = (void *) 0;
+    m_pD3D9Ex = (void *) 0;
+
+} // void D3D9Device::Close(void)
+
+typedef
+    IDirect3D9 * (WINAPI *D3DCreateFunctionPtr_t) (UINT);
+
+typedef
+    HRESULT (WINAPI *D3DExCreateFunctionPtr_t) (UINT, IDirect3D9Ex **);
+
+bool D3D9Device::Init(const mfxU32 adapterNum)
+{
+    // close the device before initialization
+    Close();
+
+    // load the library
+    if (NULL == m_hModule)
+    {
+        LoadDLLModule(L"d3d9.dll");
+    }
+
+    if (m_hModule)
+    {
+        D3DCreateFunctionPtr_t pFunc;
+
+        // load address of procedure to create D3D device
+        pFunc = (D3DCreateFunctionPtr_t) GetProcAddress(m_hModule, "Direct3DCreate9");
+        if (pFunc)
+        {
+            D3DADAPTER_IDENTIFIER9 adapterIdent;
+            IDirect3D9 *pD3D9;
+            HRESULT hRes;
+
+            // create D3D object
+            m_pD3D9 = pFunc(D3D_SDK_VERSION);
+
+            if (NULL == m_pD3D9)
+            {
+                DXVA2DEVICE_TRACE(("FAIL: Direct3DCreate9(%d) : GetLastError()=0x%x", D3D_SDK_VERSION, GetLastError()));
+                return false;
+            }
+
+            // cast the interface
+            pD3D9 = (IDirect3D9 *) m_pD3D9;
+
+            m_numAdapters = pD3D9->GetAdapterCount();
+            if (adapterNum >= m_numAdapters)
+            {
+                return false;
+            }
+
+            // get the card's parameters
+            hRes = pD3D9->GetAdapterIdentifier(adapterNum, 0, &adapterIdent);
+            if (D3D_OK != hRes)
+            {
+                DXVA2DEVICE_TRACE(("FAIL: GetAdapterIdentifier(%d) = 0x%x \n", adapterNum, hRes)); 
+                return false;
+            }
+
+            m_vendorID = adapterIdent.VendorId;
+            m_deviceID = adapterIdent.DeviceId;
+            m_driverVersion = (mfxU64)adapterIdent.DriverVersion.QuadPart;
+
+            // load LUID
+            do
+            {    
+                IDirect3D9Ex *pD3D9Ex;
+                D3DExCreateFunctionPtr_t pFuncEx;
+                LUID d3d9LUID;
+
+                // find the appropriate function
+                pFuncEx = (D3DExCreateFunctionPtr_t) GetProcAddress(m_hModule, "Direct3DCreate9Ex");
+                if (NULL == pFuncEx)
+                {
+                    // the extended interface is not supported
+                    break;
+                }
+
+                // create extended interface
+                hRes = pFuncEx(D3D_SDK_VERSION, &pD3D9Ex);
+                if (FAILED(hRes))
+                {
+                    // can't create extended interface
+                    break;
+                }
+                m_pD3D9Ex = pD3D9Ex;
+
+                // obtain D3D9 device LUID
+                hRes = pD3D9Ex->GetAdapterLUID(adapterNum, &d3d9LUID);
+                if (FAILED(hRes))
+                {
+                    // can't get extended interface
+                    break;
+                }
+
+                // copy the LUID
+                *((LUID *) &m_luid) = d3d9LUID;
+
+            } while (FAILED(hRes));
+        }
+        else
+        {
+            DXVA2DEVICE_TRACE_OPERATION({
+                wchar_t path[1024]; 
+                DWORD lastErr = GetLastError();
+                GetModuleFileNameW(m_hModule, path, sizeof(path)/sizeof(path[0]));
+                printf("FAIL: invoking GetProcAddress(Direct3DCreate9) in %S : GetLastError()==0x%x\n", path, lastErr); });
+                return false;
+        }
+    }
+    else
+    {
+        DXVA2DEVICE_TRACE(("FAIL: invoking LoadLibrary(\"d3d9.dll\") : GetLastError()==0x%x\n", GetLastError())); 
+        return false;
+    }
+
+    return true;
+
+} // bool D3D9Device::Init(const mfxU32 adapterNum)
 
 typedef
 HRESULT (WINAPI *DXGICreateFactoryFunc) (REFIID riid, void **ppFactory);
@@ -278,6 +431,41 @@ void DXVA2Device::Close(void)
 
 } // void DXVA2Device::Close(void)
 
+bool DXVA2Device::InitD3D9(const mfxU32 adapterNum)
+{
+    D3D9Device d3d9Device;
+    bool bRes;
+
+    // release the object before initialization
+    Close();
+
+    // create 'old fashion' device
+    bRes = d3d9Device.Init(adapterNum);
+    if (false == bRes)
+    {
+        return false;
+    }
+
+    m_numAdapters = d3d9Device.GetAdapterCount();
+
+    // check if the application is under Remote Desktop
+    if ((0 == d3d9Device.GetVendorID()) || (0 == d3d9Device.GetDeviceID()))
+    {
+        // get the required parameters alternative way and ...
+        UseAlternativeWay(&d3d9Device);
+    }
+    else
+    {
+        // save the parameters and ...
+        m_vendorID = d3d9Device.GetVendorID();
+        m_deviceID = d3d9Device.GetDeviceID();
+        m_driverVersion = d3d9Device.GetDriverVersion();
+    }
+
+    // ... say goodbye
+    return true;
+} // bool InitD3D9(const mfxU32 adapterNum)
+
 bool DXVA2Device::InitDXGI1(const mfxU32 adapterNum)
 {
     DXGI1Device dxgi1Device;
@@ -303,6 +491,49 @@ bool DXVA2Device::InitDXGI1(const mfxU32 adapterNum)
 
 } // bool DXVA2Device::InitDXGI1(const mfxU32 adapterNum)
 
+void DXVA2Device::UseAlternativeWay(const D3D9Device *pD3D9Device)
+{
+    mfxU64 d3d9LUID = pD3D9Device->GetLUID();
+
+    // work only with valid LUIDs
+    if (0 == d3d9LUID)
+    {
+        return;
+    }
+
+    DXGI1Device dxgi1Device;
+    mfxU32 curDevice = 0;
+    bool bRes = false;
+
+    do
+    {
+        // initialize the next DXGI1 or DXGI device
+        bRes = dxgi1Device.Init(curDevice);
+        if (false == bRes)
+        {
+            // there is no more devices
+            break;
+        }
+
+        // is it required device ?
+        if (d3d9LUID == dxgi1Device.GetLUID())
+        {
+            m_vendorID = dxgi1Device.GetVendorID();
+            m_deviceID = dxgi1Device.GetDeviceID();
+            m_driverVersion = dxgi1Device.GetDriverVersion();
+            return ;
+        }
+
+        // get the next device
+        curDevice += 1;
+
+    } while (bRes);
+
+    dxgi1Device.Close();
+    // we need to match a DXGI(1) device to the D3D9 device
+
+} // void DXVA2Device::UseAlternativeWay(const D3D9Device *pD3D9Device)
+
 mfxU32 DXVA2Device::GetVendorID(void) const
 {
     return m_vendorID;
@@ -325,3 +556,4 @@ mfxU32 DXVA2Device::GetAdapterCount(void) const
     return m_numAdapters;
 
 } // mfxU32 DXVA2Device::GetAdapterCount(void) const
+#endif

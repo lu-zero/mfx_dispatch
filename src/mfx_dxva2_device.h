@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -31,13 +31,11 @@ File Name: mfx_dxva2_device.h
 #if !defined(__MFX_DXVA2_DEVICE_H)
 #define __MFX_DXVA2_DEVICE_H
 
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#endif // #if defined(_WIN32) || defined(_WIN64)
 
-#if defined( __MINGW32__ ) || defined ( __MINGW64__ )
-#include <inttypes.h>
-#endif
-
-#include <mfx/mfxdefs.h>
+#include <mfxdefs.h>
 
 #ifdef DXVA2DEVICE_LOG
 #include <stdio.h>
@@ -45,7 +43,7 @@ File Name: mfx_dxva2_device.h
 #define DXVA2DEVICE_TRACE_OPERATION(expr) expr;
 #else
 #define DXVA2DEVICE_TRACE(expr)
-#define DXVA2DEVICE_TRACE_OPERATION(expr)
+#define DXVA2DEVICE_TRACE_OPERATION(expr) 
 #endif
 
 namespace MFX
@@ -60,7 +58,7 @@ public:
     virtual
     ~DXDevice(void) = 0;
 
-    // Initialize device using DXGI 1.1 interface
+    // Initialize device using DXGI 1.1 or VAAPI interface
     virtual
     bool Init(const mfxU32 adapterNum) = 0;
 
@@ -85,8 +83,10 @@ protected:
     // Free DLL module
     void UnloadDLLModule(void);
 
+#if defined(_WIN32) || defined(_WIN64)
     // Handle to the DLL library
     HMODULE m_hModule;
+#endif // #if defined(_WIN32) || defined(_WIN64)
 
     // Number of adapters available
     mfxU32 m_numAdapters;
@@ -104,6 +104,33 @@ private:
     // unimplemented by intent to make this class and its descendants non-copyable
     DXDevice(const DXDevice &);
     void operator=(const DXDevice &);
+};
+
+#if defined(_WIN32) || defined(_WIN64)
+class D3D9Device : public DXDevice
+{
+public:
+    // Default constructor
+    D3D9Device(void);
+    // Destructor
+    virtual
+        ~D3D9Device(void);
+
+    // Initialize device using D3D v9 interface
+    virtual
+        bool Init(const mfxU32 adapterNum);
+
+    // Close the object
+    virtual
+        void Close(void);
+
+protected:
+
+    // Pointer to the D3D v9 interface
+    void *m_pD3D9;
+    // Pointer to the D3D v9 extended interface
+    void *m_pD3D9Ex;
+
 };
 
 class DXGI1Device : public DXDevice
@@ -131,6 +158,7 @@ protected:
     void *m_pDXGIAdapter1;
 
 };
+#endif // #if defined(_WIN32) || defined(_WIN64)
 
 class DXVA2Device
 {
@@ -139,6 +167,9 @@ public:
     DXVA2Device(void);
     // Destructor
     ~DXVA2Device(void);
+
+    // Initialize device using D3D v9 interface
+    bool InitD3D9(const mfxU32 adapterNum);
 
     // Initialize device using DXGI 1.1 interface
     bool InitDXGI1(const mfxU32 adapterNum);
@@ -154,6 +185,9 @@ public:
     void Close(void);
 
 protected:
+
+    // Get vendor & device IDs by alternative way (D3D9 in Remote Desktop sessions)
+    void UseAlternativeWay(const D3D9Device *pD3D9Device);
 
     // Number of adapters available
     mfxU32 m_numAdapters;

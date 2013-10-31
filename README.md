@@ -39,3 +39,10 @@ BEWARE it is draft code and history will be rewritten many times.
 `# make -j`
 
 `# make install`
+
+
+# Building on Linux
+
+The linux version currently leverages libva, thus either libva-drm or libva-x11 is required.
+Only autotools is tested currently.
+

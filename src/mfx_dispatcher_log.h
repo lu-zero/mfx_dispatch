@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -68,11 +68,8 @@ enum
 #define DISPATCHER_LOG_EVENT_GUID L"{EB0538CC-4FEE-484d-ACEE-1182E9F37A57}"
 
 //puts a sink into listeners list
-//#define DISPATCHER_LOG_REGISTER_EVENT_PROVIDER
-
-//puts a sink into listeners list
-//#define DISPATCHER_LOG_REGISTER_FILE_WRITER
-#define DISPACTHER_LOG_FW_PATH "c:\\dispatcher.log"
+// #define DISPATCHER_LOG_REGISTER_EVENT_PROVIDER
+// #define DISPATCHER_LOG_REGISTER_FILE_WRITER
 
 #endif // #if defined(_WIN32) || defined(_WIN64)
 
@@ -84,7 +81,7 @@ class IMsgHandler
 {
 public:
     virtual ~IMsgHandler(){}
-    virtual void Write(int level, int opcode, char * msg, va_list argptr) = 0;
+    virtual void Write(int level, int opcode, const char * msg, va_list argptr) = 0;
 };
 
 #if defined(_WIN32) || defined(_WIN64)
@@ -177,7 +174,7 @@ public:
     void   DetachSink(int nsink, IMsgHandler *pHandler);
     void   ExchangeSink(int nsink, IMsgHandler *pOld, IMsgHandler *pNew);
     void   DetachAllSinks();
-    void   Write(int level, int opcode, char * msg, va_list argptr);
+    void   Write(int level, int opcode, const char * msg, va_list argptr);
     
 protected:
     DispatchLog();
@@ -200,7 +197,7 @@ struct  DispatcherLogBracketsHelper
 struct DispatchLogBlockHelper
 {
     int  m_level;
-    void Write(char * str, ...);
+    void Write(const char * str, ...);
     DispatchLogBlockHelper (int level)
         : m_level(level)
     {
@@ -226,7 +223,9 @@ protected:
     ETWHandlerFactory(){}
 };
 #endif
+#endif // #if defined(_WIN32) || defined(_WIN64)
 
+#if defined(DISPATCHER_LOG_REGISTER_FILE_WRITER)
 class FileSink 
     : public DSSingleTone<FileSink>
     , public IMsgHandler
@@ -243,11 +242,15 @@ private:
     FILE * m_hdl;
     FileSink(const std::string & log_file)
     {
+#if defined(_WIN32) || defined(_WIN64)
         fopen_s(&m_hdl, log_file.c_str(), "a");
+#else
+        m_hdl = fopen(log_file.c_str(), "a");
+#endif
     }
     
 };
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif
 
 //-----utility functions
 //since they are not called outside of macro we can define them here

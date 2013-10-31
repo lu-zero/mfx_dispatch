@@ -24,66 +24,66 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-File Name: mfx_load_dll.cpp
+File Name: mfx_load_dll_linux.cpp
 
 \* ****************************************************************************** */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if !defined(_WIN32) && !defined(_WIN64)
 
 #include "mfx_dispatcher.h"
-#include "mfx_load_dll.h"
-
-#include <wchar.h>
+#include <dlfcn.h>
 #include <string.h>
-#include <windows.h>
 
 #if !defined(_DEBUG)
 
-#if defined(_WIN64)
-const
-wchar_t * const defaultDLLName[2] = {L"libmfxhw64.dll",
-                                     L"libmfxsw64.dll"};
-#elif defined(_WIN32)
-const
-wchar_t * const defaultDLLName[2] = {L"libmfxhw32.dll",
-                                     L"libmfxsw32.dll"};
+#if defined(LINUX64)
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw64.so",
+                                            "libmfxsw64.so"};
+#elif defined(__APPLE__)
+#ifdef __i386__
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw32.dylib",
+                                            "libmfxsw32.dylib"};
+#else
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw64.dylib",
+                                            "libmfxsw64.dylib"};
+#endif // #ifdef __i386__ for __APPLE__
 
-#endif // (defined(_WIN64))
+#else // for Linux32 and Android
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw32.so",
+                                            "libmfxsw32.so"};
+#endif // (defined(WIN64))
 
 #else // defined(_DEBUG)
 
-#if defined(_WIN64)
-const
-msdk_disp_char * const defaultDLLName[2] = {L"libmfxhw64_d.dll",
-                                            L"libmfxsw64_d.dll"};
-#elif defined(WIN32)
-const
-msdk_disp_char * const defaultDLLName[2] = {L"libmfxhw32_d.dll",
-                                            L"libmfxsw32_d.dll"};
+#if defined(LINUX64)
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw64_d.so",
+                                            "libmfxsw64_d.so"};
+#elif defined(__APPLE__)
+#ifdef __i386__
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw32_d.dylib",
+                                            "libmfxsw32_d.dylib"};
+#else
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw64_d.dylib",
+                                            "libmfxsw64_d.dylib"};
+#endif // #ifdef __i386__ for __APPLE__
 
-#endif // (defined(_WIN64))
+#else // for Linux32 and Android
+const msdk_disp_char * defaultDLLName[2] = {"libmfxhw32_d.so",
+                                            "libmfxsw32_d.so"};
+#endif // (defined(WIN64))
 
 #endif // !defined(_DEBUG)
 
 namespace MFX
 {
 
-mfxStatus mfx_get_default_dll_name(msdk_disp_char *pPath, size_t pathSize, eMfxImplType implType)
+mfxStatus mfx_get_default_dll_name(msdk_disp_char *pPath, size_t /*pathSize*/, eMfxImplType implType)
 {
-    if (!pPath)
-    {
-        return MFX_ERR_NULL_PTR;
-    }
-    
-    // there are only 2 implementation with default DLL names
-#if _MSC_VER >= 1400
-    return 0 == wcscpy_s(pPath, pathSize, defaultDLLName[implType & 1])
-        ? MFX_ERR_NONE : MFX_ERR_UNKNOWN;
-#else    
-    wcscpy(pPath, defaultDLLName[implType & 1]);
+    strcpy(pPath, defaultDLLName[implType]);
+
     return MFX_ERR_NONE;
-#endif
-} // mfxStatus mfx_get_default_dll_name(wchar_t *pPath, size_t pathSize, eMfxImplType implType)
+
+} // mfxStatus GetDefaultDLLName(wchar_t *pPath, size_t pathSize, eMfxImplType implType)
 
 mfxModuleHandle mfx_dll_load(const msdk_disp_char *pFileName)
 {
@@ -94,16 +94,10 @@ mfxModuleHandle mfx_dll_load(const msdk_disp_char *pFileName)
     {
         return NULL;
     }
-
-    // set the silent error mode
-    UINT prevErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
-    // load the library's module
-    hModule = LoadLibraryW(pFileName);
-    // set the previous error mode
-    SetErrorMode(prevErrorMode);
+    // load the module
+    hModule = dlopen(pFileName, RTLD_LAZY);
 
     return hModule;
-
 } // mfxModuleHandle mfx_dll_load(const wchar_t *pFileName)
 
 mfxFunctionPointer mfx_dll_get_addr(mfxModuleHandle handle, const char *pFunctionName)
@@ -113,7 +107,13 @@ mfxFunctionPointer mfx_dll_get_addr(mfxModuleHandle handle, const char *pFunctio
         return NULL;
     }
 
-    return (mfxFunctionPointer) GetProcAddress((HMODULE) handle, pFunctionName);
+    mfxFunctionPointer addr = (mfxFunctionPointer) dlsym(handle, pFunctionName);
+    if (dlerror())
+    {
+        return NULL;
+    }
+
+    return addr;
 } // mfxFunctionPointer mfx_dll_get_addr(mfxModuleHandle handle, const char *pFunctionName)
 
 bool mfx_dll_free(mfxModuleHandle handle)
@@ -122,13 +122,11 @@ bool mfx_dll_free(mfxModuleHandle handle)
     {
         return true;
     }
+    dlclose(handle);
 
-    BOOL bRes = FreeLibrary((HMODULE)handle);
-
-    return !!bRes;
+    return true;
 } // bool mfx_dll_free(mfxModuleHandle handle)
-
 
 } // namespace MFX
 
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if !defined(_WIN32) && !defined(_WIN64)

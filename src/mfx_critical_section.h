@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -30,10 +30,6 @@ File Name: mfx_critical_section.h
 
 #if !defined(__MFX_CRITICAL_SECTION_H)
 #define __MFX_CRITICAL_SECTION_H
-
-#if defined( __MINGW32__ ) || defined ( __MINGW64__ )
-#include <inttypes.h>
-#endif
 
 #include <mfx/mfxdefs.h>
 

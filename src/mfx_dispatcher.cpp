@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -31,8 +31,17 @@ File Name: mfx_dispatcher.cpp
 #include "mfx_dispatcher.h"
 #include "mfx_dispatcher_log.h"
 #include "mfx_load_dll.h"
+
+#include <string.h>
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 
+#else
+
+#include <dlfcn.h>
+#include <iostream>
+
+#endif // defined(_WIN32) || defined(_WIN64)
 
 MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion) :
     apiVersion(requiredVersion)
@@ -111,8 +120,8 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
     this->implInterface = implInterface;
 
     {
-        mfxVersion maxAPIVersion = {0, 0};
-        mfxVersion minAPIVersion = {0x7fff, 0x7fff};
+        mfxVersion maxAPIVersion = {{0, 0}};
+        mfxVersion minAPIVersion = {{0x7fff, 0x7fff}};
 
         DISPATCHER_LOG_BLOCK(("invoking LoadLibrary(%S)\n", pPath));
         // load the DLL into the memory
@@ -132,6 +141,10 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
             for (i = 0; i < eFuncTotal; i += 1)
             {
                 mfxFunctionPointer pProc = (mfxFunctionPointer) MFX::mfx_dll_get_addr(hModule, APIFunc[i].pName);
+#ifdef ANDROID
+                // on Android very first call to dlsym may fail
+                if (!pProc) pProc = (mfxFunctionPointer) MFX::mfx_dll_get_addr(hModule, APIFunc[i].pName);
+#endif
                 if (pProc)
                 {
                     // function exists in the library,
@@ -176,7 +189,11 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         }
         else
         {
+#if defined(_WIN32) || defined(_WIN64)
             DISPATCHER_LOG_WRN((("can't find DLL: GetLastErr()=0x%x\n"), GetLastError()))
+#else
+            std::cerr << "can't find DLL: dlerror()" << dlerror() << std::endl;
+#endif
             mfxRes = MFX_ERR_UNSUPPORTED;
         }
     }
@@ -214,7 +231,7 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
 
     return mfxRes;
 
-} // mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const wchar_t *pPath, eMfxImplType implType, mfxIMPL impl)
+} // mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImplType implType, mfxIMPL impl)
 
 mfxStatus MFX_DISP_HANDLE::UnLoadSelectedDLL(void)
 {

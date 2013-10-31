@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -27,6 +27,8 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 File Name: mfx_library_iterator.cpp
 
 \* ****************************************************************************** */
+
+#if defined(_WIN32) || defined(_WIN64)
 
 #include "mfx_library_iterator.h"
 
@@ -90,7 +92,7 @@ void MFXLibraryIterator::Release(void)
 
 } // void MFXLibraryIterator::Release(void)
 
-mfxStatus MFXLibraryIterator::Init(eMfxImplType implType, const mfxU32 adapterNum, int storageID)
+mfxStatus MFXLibraryIterator::Init(eMfxImplType implType, mfxIMPL implInterface, const mfxU32 adapterNum, int storageID)
 {
     DXVA2Device dxvaDevice;
     HKEY rootHKey;
@@ -119,14 +121,51 @@ mfxStatus MFXLibraryIterator::Init(eMfxImplType implType, const mfxU32 adapterNu
 
     // set the required library's implementation type
     m_implType = implType;
+    m_implInterface = implInterface != 0 
+                    ? implInterface
+                    : MFX_IMPL_VIA_ANY;
 
-    // try to open DXGI 1.1 device to get hardware ID
-    if (!dxvaDevice.InitDXGI1(adapterNum))
+    if (MFX_IMPL_VIA_D3D9 == m_implInterface)
     {
-        DISPATCHER_LOG_INFO((("dxvaDevice.InitDXGI1(%d) Failed "), adapterNum ));
+        // try to create the Direct3D 9 device and find right adapter
+        if (!dxvaDevice.InitD3D9(adapterNum))
+        {
+            DISPATCHER_LOG_INFO((("dxvaDevice.InitD3D9(%d) Failed "), adapterNum ));
+            return MFX_ERR_UNSUPPORTED;
+        }        
+    }
+    else if (MFX_IMPL_VIA_D3D11 == m_implInterface)
+    {
+        // try to open DXGI 1.1 device to get hardware ID
+        if (!dxvaDevice.InitDXGI1(adapterNum))
+        {
+            DISPATCHER_LOG_INFO((("dxvaDevice.InitDXGI1(%d) Failed "), adapterNum ));
+            return MFX_ERR_UNSUPPORTED;
+        }
+    } 
+    else if (MFX_IMPL_VIA_ANY == m_implInterface)
+    {
+        // try the Direct3D 9 device
+        if (dxvaDevice.InitD3D9(adapterNum))
+        {
+            m_implInterface = MFX_IMPL_VIA_D3D9; // store value for GetImplementationType() call
+        }
+        // else try to open DXGI 1.1 device to get hardware ID
+        else if (dxvaDevice.InitDXGI1(adapterNum))
+        {
+            m_implInterface = MFX_IMPL_VIA_D3D11; // store value for GetImplementationType() call
+        }
+        else
+        {
+            DISPATCHER_LOG_INFO((("Unsupported adapter %d "), adapterNum ));
+            return MFX_ERR_UNSUPPORTED;
+        }
+    }
+    else
+    {
+        DISPATCHER_LOG_ERROR((("Unknown implementation type %d "), m_implInterface ));
         return MFX_ERR_UNSUPPORTED;
     }
-
 
     // obtain card's parameters
     m_vendorID = dxvaDevice.GetVendorID();
@@ -368,7 +407,13 @@ mfxStatus MFXLibraryIterator::SelectDLLVersion(wchar_t *pPath, size_t pathSize,
 
     return MFX_ERR_NONE;
 
-} // mfxStatus MFXLibraryIterator::SelectDLLVersion(wchar_t *pPath, size_t pathSize,
+} // mfxStatus MFXLibraryIterator::SelectDLLVersion(wchar_t *pPath, size_t pathSize, eMfxImplType *pImplType, mfxVersion minVersion)
+
+mfxIMPL MFXLibraryIterator::GetImplementationType()
+{
+    return m_implInterface;
+} // mfxIMPL MFXLibraryIterator::GetImplementationType()
 
 } // namespace MFX
+#endif // #if defined(_WIN32) || defined(_WIN64)
 

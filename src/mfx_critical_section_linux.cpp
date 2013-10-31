@@ -24,29 +24,68 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-File Name: mfx_load_dll.h
+File Name: mfx_critical_section_linux.cpp
 
 \* ****************************************************************************** */
 
-#if !defined(__MFX_LOAD_DLL_H)
-#define __MFX_LOAD_DLL_H
+#if !defined(_WIN32) && !defined(_WIN64)
 
-#include "mfx_dispatcher.h"
+#include "mfx_critical_section.h"
+#include <sched.h>
+
+#define MFX_WAIT() sched_yield()
+
+// static section of the file
+namespace
+{
+
+enum
+{
+    MFX_SC_IS_FREE = 0,
+    MFX_SC_IS_TAKEN = 1
+};
+
+} // namespace
 
 namespace MFX
 {
 
+mfxU32 mfxInterlockedCas32(mfxCriticalSection *pCSection, mfxU32 value_to_exchange, mfxU32 value_to_compare)
+{
+    mfxU32 previous_value;
 
-    //
-    // declare DLL loading routines
-    //
+    asm volatile ("lock; cmpxchgl %1,%2"
+                  : "=a" (previous_value)
+                  : "r" (value_to_exchange), "m" (*pCSection), "0" (value_to_compare)
+                  : "memory", "cc");
+    return previous_value;
+}
 
-    mfxStatus mfx_get_default_dll_name(msdk_disp_char *pPath, size_t pathSize, eMfxImplType implType);
+mfxU32 mfxInterlockedXchg32(mfxCriticalSection *pCSection, mfxU32 value)
+{
+    mfxU32 previous_value = value;
 
-    mfxModuleHandle mfx_dll_load(const msdk_disp_char *file_name);
-    mfxFunctionPointer mfx_dll_get_addr(mfxModuleHandle handle, const char *func_name);
-    bool mfx_dll_free(mfxModuleHandle handle);
+    asm volatile ("lock; xchgl %0,%1"
+                  : "=r" (previous_value), "+m" (*pCSection)
+                  : "0" (previous_value));
+    return previous_value;
+}
+
+void mfxEnterCriticalSection(mfxCriticalSection *pCSection)
+{
+    while (MFX_SC_IS_TAKEN == mfxInterlockedCas32(pCSection,
+                                                  MFX_SC_IS_TAKEN,
+                                                  MFX_SC_IS_FREE))
+    {
+        MFX_WAIT();
+    }
+} // void mfxEnterCriticalSection(mfxCriticalSection *pCSection)
+
+void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
+{
+    mfxInterlockedXchg32(pCSection, MFX_SC_IS_FREE);
+} // void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
 
 } // namespace MFX
 
-#endif  // __MFX_LOAD_DLL_H
+#endif // #if !defined(_WIN32) && !defined(_WIN64)

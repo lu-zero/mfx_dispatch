@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -31,12 +31,14 @@ File Name: mfx_dispatcher_log.h
 #if defined(MFX_DISPATCHER_LOG)
 
 #include "mfx_dispatcher_log.h"
-#include <mfx/mfxstructures.h>
+#include "mfxstructures.h"
+#if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #if defined(DISPATCHER_LOG_REGISTER_EVENT_PROVIDER)
 #include <evntprov.h>
 #include <winmeta.h>
 #endif
+#endif // #if defined(_WIN32) || defined(_WIN64)
 #include <stdarg.h>
 #include <algorithm>
 #include <string>
@@ -45,8 +47,8 @@ File Name: mfx_dispatcher_log.h
 struct CodeStringTable
 {
     int code;
-    char *string;
-} LevelStrings []=
+    const char *string;
+} LevelStrings []= 
 {
     {DL_INFO,  "INFO:   "},
     {DL_WRN,   "WARNING:"},
@@ -54,17 +56,17 @@ struct CodeStringTable
 };
 
 #define DEFINE_CODE(code)\
-    code, #code
+    {code, #code}
 
 static CodeStringTable StringsOfImpl[] = {
-    DEFINE_CODE(MFX_IMPL_AUTO),
+    DEFINE_CODE(MFX_IMPL_AUTO),       
     DEFINE_CODE(MFX_IMPL_SOFTWARE),
-    DEFINE_CODE(MFX_IMPL_HARDWARE),
-    DEFINE_CODE(MFX_IMPL_AUTO_ANY),
-    DEFINE_CODE(MFX_IMPL_HARDWARE_ANY),
-    DEFINE_CODE(MFX_IMPL_HARDWARE2),
-    DEFINE_CODE(MFX_IMPL_HARDWARE3),
-    DEFINE_CODE(MFX_IMPL_HARDWARE4),
+    DEFINE_CODE(MFX_IMPL_HARDWARE),     
+    DEFINE_CODE(MFX_IMPL_AUTO_ANY),     
+    DEFINE_CODE(MFX_IMPL_HARDWARE_ANY), 
+    DEFINE_CODE(MFX_IMPL_HARDWARE2), 
+    DEFINE_CODE(MFX_IMPL_HARDWARE3), 
+    DEFINE_CODE(MFX_IMPL_HARDWARE4), 
 
     DEFINE_CODE(MFX_IMPL_UNSUPPORTED)
 };
@@ -102,13 +104,13 @@ static CodeStringTable StringsOfStatus[] =
     DEFINE_CODE(MFX_WRN_INCOMPATIBLE_VIDEO_PARAM),
     DEFINE_CODE(MFX_WRN_VALUE_NOT_CHANGED       ),
     DEFINE_CODE(MFX_WRN_OUT_OF_RANGE            ),
-
+    
 };
 
 #define CODE_TO_STRING(code,  array)\
     CodeToString(code, array, sizeof(array)/sizeof(array[0]))
 
-char* CodeToString(int code, CodeStringTable array[], int len )
+const char* CodeToString(int code, CodeStringTable array[], int len )
 {
     for (int i = 0 ; i < len; i++)
     {
@@ -142,7 +144,7 @@ void DispatcherLogBracketsHelper::Write(char * str, ...)
     va_end(argsptr);
 }
 
-void DispatchLogBlockHelper::Write(char * str, ...)
+void DispatchLogBlockHelper::Write(const char * str, ...)
 {
     va_list argsptr;
     va_start(argsptr, str);
@@ -191,7 +193,7 @@ void   DispatchLog::ExchangeSink(int nsink, IMsgHandler *oldHdl, IMsgHandler *ne
     if (nsink & DL_SINK_IMsgHandler)
     {
         std::list<IMsgHandler*> :: iterator it = std::find(m_Recepients.begin(), m_Recepients.end(), oldHdl);
-
+        
         //cannot exchange in that case
         if (m_Recepients.end() == it)
             return;
@@ -207,7 +209,7 @@ void   DispatchLog::DetachAllSinks()
     m_DispatcherLogSink = DL_SINK_NULL;
 }
 
-void   DispatchLog::Write(int level, int opcode, char * msg, va_list argptr)
+void   DispatchLog::Write(int level, int opcode, const char * msg, va_list argptr)
 {
     int sinkTable[] =
     {
@@ -215,16 +217,16 @@ void   DispatchLog::Write(int level, int opcode, char * msg, va_list argptr)
         DL_SINK_IMsgHandler,
     };
 
-    for (int i = 0; i < sizeof(sinkTable) / sizeof(sinkTable[0]); i++)
+    for (size_t i = 0; i < sizeof(sinkTable) / sizeof(sinkTable[0]); i++)
     {
         switch(m_DispatcherLogSink & sinkTable[i])
         {
             case  DL_SINK_NULL:
                 break;
-
+            
             case DL_SINK_PRINTF:
             {
-                char msg_formated[1024];
+                char msg_formated[1024] = {0};
 
                 if (NULL != msg && level != DL_LOADED_LIBRARY)
                 {
@@ -267,7 +269,7 @@ public:
         {
             return;
         }
-
+        
         EventRegister(&rguid, NULL, NULL, &m_EventHandle);
 
         m_bProviderEnable = 0 != EventProviderEnabled(m_EventHandle, 1,0);
@@ -302,10 +304,10 @@ public:
         EVENT_DATA_DESCRIPTOR data_descriptor;
 
         EventDescZero(&descriptor);
-
-        descriptor.Opcode = (UCHAR)opcode;
+        
+        descriptor.Opcode = (UCHAR)opcode; 
         descriptor.Level  = (UCHAR)level;
-
+        
         if (m_bUseFormatter)
         {
             if (NULL != msg)
@@ -322,7 +324,7 @@ public:
             }
         }else
         {
-            //TODO: non formated events supports under zbb
+            //TODO: non formated events supports under zbb 
         }
 
         EventWrite(m_EventHandle, &descriptor, 1, &data_descriptor);
@@ -333,7 +335,7 @@ protected:
     //we may not use formatter in some cases described in dispatch_log macro
     //it significantly increases performance by eliminating any vsprintf operations
     bool      m_bUseFormatter;
-    //consumer is attached, dispatcher trace to reduce formating overhead
+    //consumer is attached, dispatcher trace to reduce formating overhead 
     //submits event only if consumer attached
     bool      m_bProviderEnable;
     REGHANDLE m_EventHandle;
@@ -409,6 +411,7 @@ public:
 };
 #endif
 
+#if defined(DISPATCHER_LOG_REGISTER_FILE_WRITER)
 template <>
 class SinkRegistrator<FileSink>
 {
@@ -427,7 +430,7 @@ void FileSink::Write(int level, int /*opcode*/, char * msg, va_list argptr)
         vfprintf(m_hdl, msg, argptr);
     }
 }
-
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 //singletons initialization section

@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -115,8 +115,8 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInit)(mfxIMPL impl, mfxVersion *pVer, mfx
     // implementation method masked from the input parameter
     const mfxIMPL implMethod = impl & (MFX_IMPL_VIA_ANY - 1);
     // implementation interface masked from the input parameter
-    const mfxIMPL implInterface = impl & -MFX_IMPL_VIA_ANY;
-    mfxVersion requiredVersion = {MFX_VERSION_MINOR, MFX_VERSION_MAJOR};
+    mfxIMPL implInterface = impl & -MFX_IMPL_VIA_ANY;
+    mfxVersion requiredVersion = {{MFX_VERSION_MINOR, MFX_VERSION_MAJOR}};
 
     // check error(s)
     if (NULL == session)
@@ -166,12 +166,13 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInit)(mfxIMPL impl, mfxVersion *pVer, mfx
     do
     {
         MFX::MFXLibraryIterator libIterator;
-        int currentStorage = MFX::MFX_CURRENT_USER_KEY;
+        int currentStorage = MFX::MFX_STORAGE_ID_FIRST;
 
         do
         {
             // initialize the library iterator
-            mfxRes = libIterator.Init(implTypes[curImplIdx].implType,
+            mfxRes = libIterator.Init(implTypes[curImplIdx].implType, 
+                                      implInterface,
                                       implTypes[curImplIdx].adapterID,
                                       currentStorage);
 
@@ -179,6 +180,14 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInit)(mfxIMPL impl, mfxVersion *pVer, mfx
             // looking for a suitable library with higher merit value.
             if (MFX_ERR_NONE == mfxRes)
             {
+            
+                if (
+                    !implInterface || 
+                    implInterface == MFX_IMPL_VIA_ANY)
+                {
+                    implInterface = libIterator.GetImplementationType();
+                }
+
                 do
                 {
                     eMfxImplType implType;
@@ -209,7 +218,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInit)(mfxIMPL impl, mfxVersion *pVer, mfx
             // select another registry key
             currentStorage += 1;
 
-        } while ((MFX_ERR_NONE != mfxRes) && (MFX::MFX_LOCAL_MACHINE_KEY >= currentStorage));
+        } while ((MFX_ERR_NONE != mfxRes) && (MFX::MFX_STORAGE_ID_LAST >= currentStorage));
 
     } while ((MFX_ERR_NONE != mfxRes) && (++curImplIdx <= maxImplIdx));
 

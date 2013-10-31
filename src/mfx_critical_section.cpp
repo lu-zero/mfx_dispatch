@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -29,6 +29,9 @@ File Name: mfx_critical_section.cpp
 \* ****************************************************************************** */
 
 #include "mfx_critical_section.h"
+
+#if defined(_WIN32) || defined(_WIN64)
+
 #include <windows.h>
 // SDK re-declares the following functions with different call declarator.
 // We don't need them. Just redefine them to nothing.
@@ -37,8 +40,6 @@ File Name: mfx_critical_section.cpp
 #define _interlockedbittestandset64 fake_set64
 #define _interlockedbittestandreset64 fake_reset64
 #include <intrin.h>
-
-#define MFX_WAIT() SwitchToThread()
 
 // static section of the file
 namespace
@@ -57,31 +58,12 @@ namespace MFX
 
 mfxU32 mfxInterlockedCas32(mfxCriticalSection *pCSection, mfxU32 value_to_exchange, mfxU32 value_to_compare)
 {
-#if defined(_WIN32) || defined(_WIN64)
     return _InterlockedCompareExchange(pCSection, value_to_exchange, value_to_compare);
-#else // #if defined(_WIN32) || defined(_WIN64)
-    mfxU32 previous_value;
-
-    asm volatile ("lock; cmpxchgl %1,%2"
-                  : "=a" (previous_value)
-                  : "r" (value_to_exchange), "m" (*pCSection), "0" (value_to_compare)
-                  : "memory", "cc");
-    return previous_value;
-#endif // #if defined(_WIN32) || defined(_WIN64)
 }
 
-mfxU32 mfxInterlockedXchg32(mfxCriticalSection *pCSection, mfxU32 value)  
-{ 
-#if defined(_WIN32) || defined(_WIN64)
+mfxU32 mfxInterlockedXchg32(mfxCriticalSection *pCSection, mfxU32 value)
+{
     return _InterlockedExchange(pCSection, value);
-#else // #if defined(_WIN32) || defined(_WIN64)
-    mfxU32 previous_value = value;
-
-    asm volatile ("lock; xchgl %0,%1"
-                  : "=r" (previous_value), "+m" (*pCSection)
-                  : "0" (previous_value));
-    return previous_value;
-#endif // #if defined(_WIN32) || defined(_WIN64)
 }
 
 void mfxEnterCriticalSection(mfxCriticalSection *pCSection)
@@ -90,7 +72,7 @@ void mfxEnterCriticalSection(mfxCriticalSection *pCSection)
                                                   MFX_SC_IS_TAKEN,
                                                   MFX_SC_IS_FREE))
     {
-        MFX_WAIT();
+        SwitchToThread();
     }
 } // void mfxEnterCriticalSection(mfxCriticalSection *pCSection)
 
@@ -100,3 +82,5 @@ void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
 } // void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
 
 } // namespace MFX
+
+#endif // #if defined(_WIN32) || defined(_WIN64)

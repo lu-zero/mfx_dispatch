@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -28,11 +28,11 @@ File Name: mfx_dispatcher_trace.cpp
 
 \* ****************************************************************************** */
 
-#include <mfx_dispatcher.h>
+#include "mfx_dispatcher.h"
 #include "mfx_dispatcher_log.h"
 #include <memory>
 
-#include <mfx_library_iterator.h>
+#include "mfx_library_iterator.h"
 
 // static section of the file
 namespace
@@ -71,7 +71,7 @@ public:
         DispatchLog::get().DetachSink(DL_SINK_IMsgHandler, this);
     }
 
-    virtual void Write(int level, int /*opcode*/, char * msg, va_list argptr)
+    virtual void Write(int level, int /*opcode*/, const char * msg, va_list argptr)
     {
         HMODULE libModule;
         if (level == DL_LOADED_LIBRARY)
@@ -141,7 +141,7 @@ int main(int argc, const char *argv[], bool bUsePrefix)
 
                 break;
             }
-                
+
             // read specified API version
             case 'v':
             case 'V':
@@ -204,7 +204,7 @@ int main(int argc, const char *argv[], bool bUsePrefix)
     DISPATCHER_LOG_INFO(("DISPRESULT: platform=%-5s impl=%-21s ver=%d.%d : %s\n"
         , cPlatform
         , DispatcherLog_GetMFXImplString(impl).c_str()
-        , ver.Major , ver.Minor 
+        , ver.Major , ver.Minor
         , library.GetPath().empty()? "NOT FOUND" : library.GetPath().c_str()));
 
     return 0;
