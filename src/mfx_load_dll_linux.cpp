@@ -39,7 +39,7 @@
 
 #if !defined(_DEBUG)
 
-#if defined(LINUX64)
+#if defined(__linux__) && defined(__x86_64__)
 const msdk_disp_char *defaultDLLName[2] = { "libmfxhw64.so", "libmfxsw64.so" };
 #elif defined(__APPLE__)
 #ifdef __i386__
@@ -52,11 +52,11 @@ const msdk_disp_char *defaultDLLName[2] = { "libmfxhw64.dylib",
 
 #else  // for Linux32 and Android
 const msdk_disp_char *defaultDLLName[2] = { "libmfxhw32.so", "libmfxsw32.so" };
-#endif // (defined(WIN64))
+#endif
 
-#else // defined(_DEBUG)
+#else
 
-#if defined(LINUX64)
+#if defined(__linux__) && defined(__x86_64__)
 const msdk_disp_char *defaultDLLName[2] = { "libmfxhw64_d.so",
                                             "libmfxsw64_d.so" };
 #elif defined(__APPLE__)
