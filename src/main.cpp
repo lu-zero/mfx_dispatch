@@ -37,6 +37,12 @@
 #include "mfx_library_iterator.h"
 #include "mfx_critical_section.h"
 
+#ifdef MFX_HAVE_LINUX
+extern "C" {
+#include "mfx_va_glue.h"
+}
+#endif
+
 #include <memory>
 
 // module-local definitions
@@ -229,6 +235,11 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInit)(mfxIMPL impl, mfxVersion *pVer,
         // everything is OK. Save pointers to the output variable
         allocatedHandle.release();
         *((MFX_DISP_HANDLE **)session) = pHandle;
+#ifdef MFX_HAVE_LINUX
+        mfxStatus ret = mfx_allocate_va(*session);
+        if (ret != MFX_ERR_NONE)
+            return ret;
+#endif
     }
 
     return mfxRes;
@@ -243,6 +254,9 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXClose)(mfxSession session)
 
     // check error(s)
     if (pHandle) {
+#ifdef MFX_HAVE_LINUX
+        mfx_deallocate_va(session);
+#endif
         try
         {
             // unload the DLL library

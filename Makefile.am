@@ -30,6 +30,7 @@ libmfx_la_SOURCES += \
         src/mfx_win_reg_key.cpp
 else
 libmfx_la_SOURCES += \
+        src/mfx_va_glue.c                  \
         src/mfx_critical_section_linux.cpp \
         src/mfx_library_iterator_linux.cpp \
         src/mfx_load_dll_linux.cpp
