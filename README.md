@@ -34,7 +34,13 @@ BEWARE it is draft code and history will be rewritten many times.
 
 `# mkdir build && cd build`
 
+For cross-compiling to win32/64:
+
 `# cmake . -DCMAKE_INSTALL_PREFIX=/usr/x86_64-w64-mingw32 -DCMAKE_TOOLCHAIN_FILE=../Toolchain-cross-mingw32-linux.cmake`
+
+For regular linux build:
+
+`# cmake . -DCMAKE_INSTALL_PREFIX=/usr/local`
 
 `# make -j`
 

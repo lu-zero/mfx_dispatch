@@ -1,9 +1,16 @@
 project( libmfx )
 
+# FIXME Adds support for using system/other install of intel media sdk
 find_path ( INTELMEDIASDK_PATH mfx/mfxvideo.h
-  HINTS "${CMAKE_SOURCE_DIR}/include"
-  HINTS "${CMAKE_SOURCE_DIR}/mfx"
+  HINTS "${CMAKE_SOURCE_DIR}"
 )
+
+if (INTELMEDIASDK_PATH_NOTFOUND)
+  message( FATAL_ERROR "Intel MEDIA SDK include not found" )
+else (INTELMEDIASDK_PATH_NOTFOUND)
+  message(STATUS "Intel Media SDK is here: ${INTELMEDIASDK_PATH}")
+endif (INTELMEDIASDK_PATH_NOTFOUND)
+
 
 set(SOURCES
   src/main.cpp
@@ -18,23 +25,26 @@ set(SOURCES
 )
 
 include_directories(
-  include
+  ${INTELMEDIASDK_PATH}
+  ${INTELMEDIASDK_PATH}/mfx
 )
 
 add_definitions(
-  -DDISPATCHER_LOG_REGISTER_FILE_WRITER
-  -DMFX_DISPATCHER_LOG
   -DMFX_VA
-  -DWIN32
-  -D_DEBUG
   -D_LIB
 )
+
+if (CMAKE_SYSTEM_NAME EQUAL 'Windows')
+  add_definitions(
+    -DWIN32
+  )
+endif (CMAKE_SYSTEM_NAME EQUAL 'Windows')
 
 configure_file (${CMAKE_SOURCE_DIR}/libmfx.pc.cmake ${CMAKE_BINARY_DIR}/libmfx.pc @ONLY)
 
 add_library( mfx STATIC ${SOURCES} )
-install (FILES ${CMAKE_SOURCE_DIR}/mfx/*
-  DESTINATION ${CMAKE_INSTALL_PREFIX}/include/mfx)
+file(GLOB MFX_HEADERS "${CMAKE_SOURCE_DIR}/mfx/*.h")
+install (FILES ${MFX_HEADERS} DESTINATION ${CMAKE_INSTALL_PREFIX}/include)
 install (FILES ${CMAKE_BINARY_DIR}/libmfx.pc DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
 install (TARGETS mfx ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 cmake_minimum_required(VERSION 2.6)
