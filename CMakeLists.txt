@@ -15,12 +15,15 @@ endif (INTELMEDIASDK_PATH_NOTFOUND)
 set(SOURCES
   src/main.cpp
   src/mfx_critical_section.cpp
+  src/mfx_critical_section_linux.cpp
   src/mfx_dispatcher.cpp
   src/mfx_dispatcher_log.cpp
   src/mfx_dxva2_device.cpp
   src/mfx_function_table.cpp
   src/mfx_library_iterator.cpp
+  src/mfx_library_iterator_linux.cpp
   src/mfx_load_dll.cpp
+  src/mfx_load_dll_linux.cpp
   src/mfx_win_reg_key.cpp
 )
 
@@ -32,6 +35,7 @@ include_directories(
 add_definitions(
   -DMFX_VA
   -D_LIB
+  -fPIC
 )
 
 if (CMAKE_SYSTEM_NAME EQUAL 'Windows')
