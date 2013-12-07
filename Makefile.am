@@ -21,7 +21,6 @@ libmfx_la_SOURCES = \
 
 if WINDOWS
 libmfx_la_SOURCES += \
-        src/mfx_dispatcher_trace.cpp     \
 	src/mfx_dxva2_device.h           \
 	src/mfx_win_reg_key.h            \
         src/mfx_dxva2_device.cpp         \

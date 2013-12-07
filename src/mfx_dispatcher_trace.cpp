@@ -34,7 +34,7 @@
 #include "mfx_dispatcher.h"
 #include "mfx_dispatcher_log.h"
 #include <memory>
-
+#include <string>
 #include "mfx_library_iterator.h"
 
 // static section of the file

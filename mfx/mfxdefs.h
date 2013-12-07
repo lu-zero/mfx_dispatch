@@ -36,6 +36,7 @@ extern "C"
 #endif /* __cplusplus */
 
 #if defined( _WIN32 ) || defined ( _WIN64 )
+#include <windows.h>
   #define __INT64   __int64
   #define __UINT64  unsigned __int64
 #else
