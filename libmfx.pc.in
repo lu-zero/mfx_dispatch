@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: libmfx
 Description: Intel Media SDK Dispatched static library
 Version: @PACKAGE_VERSION@
-Libs: -L${libdir} -lsupc++ -lmfx @LIBVA_DRM_LIBS@ @LIBVA_X11_LIBS@
+Libs: -L${libdir} -lmfx -lstdc++ @LIBVA_DRM_LIBS@ @LIBVA_X11_LIBS@
 Libs.private:
 Cflags: -I${includedir}

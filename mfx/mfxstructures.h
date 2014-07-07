@@ -1,6 +1,6 @@
 /******************************************************************************* *\
 
-Copyright (C) 2007-2013 Intel Corporation.  All rights reserved.
+Copyright (C) 2007-2014 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -29,23 +29,14 @@ File Name: mfxstructures.h
 *******************************************************************************/
 #ifndef __MFXSTRUCTURES_H__
 #define __MFXSTRUCTURES_H__
-#include "mfxdefs.h"
+#include "mfxcommon.h"
 
-#if 0
 #pragma warning(disable: 4201)
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define MFX_MAKEFOURCC(A,B,C,D)    ((((int)A))+(((int)B)<<8)+(((int)C)<<16)+(((int)D)<<24))
-
-/* Extended Configuration Header Structure */
-typedef struct {
-    mfxU32  BufferId;
-    mfxU32  BufferSz;
-} mfxExtBuffer;
 
 /* Frame ID for SVC and MVC */
 typedef struct {
@@ -64,7 +55,12 @@ typedef struct {
 
 /* Frame Info */
 typedef struct {
-    mfxU32  reserved[6];
+    mfxU32  reserved[4];
+    mfxU16  reserved4;
+    mfxU16  BitDepthLuma;
+    mfxU16  BitDepthChroma;
+    mfxU16  Shift;
+
     mfxFrameId FrameId;
 
     mfxU32  FourCC;
@@ -92,11 +88,18 @@ typedef struct {
 enum {
     MFX_FOURCC_NV12         = MFX_MAKEFOURCC('N','V','1','2'),   /* Native Format */
     MFX_FOURCC_YV12         = MFX_MAKEFOURCC('Y','V','1','2'),
+    MFX_FOURCC_NV16         = MFX_MAKEFOURCC('N','V','1','6'),
     MFX_FOURCC_YUY2         = MFX_MAKEFOURCC('Y','U','Y','2'),
-    MFX_FOURCC_RGB3         = MFX_MAKEFOURCC('R','G','B','3'),   /* RGB24 */
-    MFX_FOURCC_RGB4         = MFX_MAKEFOURCC('R','G','B','4'),   /* RGB32 */
-    MFX_FOURCC_P8           = 41,         /*  D3DFMT_P8   */
-    MFX_FOURCC_P8_TEXTURE   = MFX_MAKEFOURCC('P','8','M','B') 
+    MFX_FOURCC_RGB3         = MFX_MAKEFOURCC('R','G','B','3'),   /* deprecated */
+    MFX_FOURCC_RGB4         = MFX_MAKEFOURCC('R','G','B','4'),   /* ARGB in that order, A channel is 8 MSBs */
+    MFX_FOURCC_P8           = 41,                                /*  D3DFMT_P8   */
+    MFX_FOURCC_P8_TEXTURE   = MFX_MAKEFOURCC('P','8','M','B'),
+    MFX_FOURCC_P010         = MFX_MAKEFOURCC('P','0','1','0'), 
+    MFX_FOURCC_P210         = MFX_MAKEFOURCC('P','2','1','0'),
+    MFX_FOURCC_BGR4         = MFX_MAKEFOURCC('B','G','R','4'),   /* ABGR in that order, A channel is 8 MSBs */
+    MFX_FOURCC_A2RGB10      = MFX_MAKEFOURCC('R','G','1','0'),   /* ARGB in that order, A channel is two MSBs */
+    MFX_FOURCC_ARGB16       = MFX_MAKEFOURCC('R','G','1','6'),   /* ARGB in that order, 64 bits, A channel is 16 MSBs */
+    MFX_FOURCC_R16          = MFX_MAKEFOURCC('R','1','6','U') 
 };
 
 /* PicStruct */
@@ -148,16 +151,22 @@ enum {
 
 /* Frame Data Info */
 typedef struct {
-    mfxU32      reserved[8];
+    mfxU32      reserved[7];
+    mfxU16      reserved1;
+    mfxU16      PitchHigh;
 
     mfxU64      TimeStamp;
     mfxU32      FrameOrder;
     mfxU16      Locked;
-    mfxU16      Pitch;
+    union{
+        mfxU16  Pitch;
+        mfxU16  PitchLow;
+    };
 
     /* color planes */
     union {
         mfxU8   *Y;
+        mfxU16  *Y16;
         mfxU8   *R;
     };
     union {
@@ -167,11 +176,13 @@ typedef struct {
         mfxU8   *CrCb;          /* for CrCb merged formats */
         mfxU8   *Cb;
         mfxU8   *U;
+        mfxU16  *U16;
         mfxU8   *G;
     };
     union {
         mfxU8   *Cr;
         mfxU8   *V;
+        mfxU16  *V16;
         mfxU8   *B;
     };
     mfxU8       *A;
@@ -226,6 +237,7 @@ typedef struct {
             union {
                 mfxU16  TargetKbps;
                 mfxU16  QPP;
+                mfxU16  ICQQuality;
             };
             union {
                 mfxU16  MaxKbps;
@@ -295,8 +307,10 @@ enum {
 /* CodecId */
 enum {
     MFX_CODEC_AVC         =MFX_MAKEFOURCC('A','V','C',' '),
+    MFX_CODEC_HEVC        =MFX_MAKEFOURCC('H','E','V','C'),
     MFX_CODEC_MPEG2       =MFX_MAKEFOURCC('M','P','G','2'),
-    MFX_CODEC_VC1         =MFX_MAKEFOURCC('V','C','1',' ')
+    MFX_CODEC_VC1         =MFX_MAKEFOURCC('V','C','1',' '),
+    MFX_CODEC_CAPTURE     =MFX_MAKEFOURCC('C','A','P','T')
 };
 
 /* CodecProfile, CodecLevel */
@@ -364,7 +378,29 @@ enum {
     MFX_LEVEL_VC1_1                         =(0x01+1),
     MFX_LEVEL_VC1_2                         =(0x02+1),
     MFX_LEVEL_VC1_3                         =(0x03+1),
-    MFX_LEVEL_VC1_4                         =(0x04+1)
+    MFX_LEVEL_VC1_4                         =(0x04+1),
+
+    /* HEVC Profiles & Levels & Tiers */
+    MFX_PROFILE_HEVC_MAIN             =1,
+    MFX_PROFILE_HEVC_MAIN10           =2,
+    MFX_PROFILE_HEVC_MAINSP           =3,
+
+    MFX_LEVEL_HEVC_1   = 10,
+    MFX_LEVEL_HEVC_2   = 20,
+    MFX_LEVEL_HEVC_21  = 21,
+    MFX_LEVEL_HEVC_3   = 30,
+    MFX_LEVEL_HEVC_31  = 31,
+    MFX_LEVEL_HEVC_4   = 40,
+    MFX_LEVEL_HEVC_41  = 41,
+    MFX_LEVEL_HEVC_5   = 50,
+    MFX_LEVEL_HEVC_51  = 51,
+    MFX_LEVEL_HEVC_52  = 52,
+    MFX_LEVEL_HEVC_6   = 60,
+    MFX_LEVEL_HEVC_61  = 61,
+    MFX_LEVEL_HEVC_62  = 62,
+
+    MFX_TIER_HEVC_MAIN  = 0,
+    MFX_TIER_HEVC_HIGH  = 0x100,
 };
 
 /* GopOptFlag */
@@ -375,10 +411,18 @@ enum {
 
 /* TargetUsages: from 1 to 7 inclusive */
 enum {
+    MFX_TARGETUSAGE_1    =1,
+    MFX_TARGETUSAGE_2    =2,
+    MFX_TARGETUSAGE_3    =3,
+    MFX_TARGETUSAGE_4    =4,
+    MFX_TARGETUSAGE_5    =5,
+    MFX_TARGETUSAGE_6    =6,
+    MFX_TARGETUSAGE_7    =7,
+
     MFX_TARGETUSAGE_UNKNOWN         =0,
-    MFX_TARGETUSAGE_BEST_QUALITY    =1,
-    MFX_TARGETUSAGE_BALANCED        =4,
-    MFX_TARGETUSAGE_BEST_SPEED      =7
+    MFX_TARGETUSAGE_BEST_QUALITY    =MFX_TARGETUSAGE_1,
+    MFX_TARGETUSAGE_BALANCED        =MFX_TARGETUSAGE_4,
+    MFX_TARGETUSAGE_BEST_SPEED      =MFX_TARGETUSAGE_7
 };
 
 /* RateControlMethod */
@@ -390,7 +434,21 @@ enum {
     MFX_RATECONTROL_RESERVED1 =5,
     MFX_RATECONTROL_RESERVED2 =6,
     MFX_RATECONTROL_RESERVED3 =100,
-    MFX_RATECONTROL_RESERVED4 =7
+    MFX_RATECONTROL_RESERVED4 =7,
+    MFX_RATECONTROL_LA        =8,
+    MFX_RATECONTROL_ICQ       =9,
+    MFX_RATECONTROL_VCM       =10,
+    MFX_RATECONTROL_LA_ICQ    =11,
+    MFX_RATECONTROL_LA_EXT    = 12
+};
+
+/* Trellis control*/
+enum {
+    MFX_TRELLIS_UNKNOWN =0,
+    MFX_TRELLIS_OFF     =0x01,
+    MFX_TRELLIS_I       =0x02,
+    MFX_TRELLIS_P       =0x04,
+    MFX_TRELLIS_B       =0x08
 };
 
 typedef struct {
@@ -428,6 +486,24 @@ typedef struct {
     mfxU16      VuiNalHrdParameters;    /* tri-state option */
 } mfxExtCodingOption;
 
+enum {
+    MFX_B_REF_UNKNOWN = 0,
+    MFX_B_REF_OFF     = 1,
+    MFX_B_REF_PYRAMID = 2
+};
+
+enum {
+    MFX_LOOKAHEAD_DS_UNKNOWN = 0,
+    MFX_LOOKAHEAD_DS_OFF     = 1,
+    MFX_LOOKAHEAD_DS_2x      = 2,
+    MFX_LOOKAHEAD_DS_4x      = 3
+};
+
+enum {
+    MFX_BPSEI_DEFAULT = 0x00,
+    MFX_BPSEI_IFRAME  = 0x01
+};
+
 typedef struct {
     mfxExtBuffer Header;
 
@@ -436,12 +512,31 @@ typedef struct {
     mfxI16      IntRefQPDelta;
 
     mfxU32      MaxFrameSize;
-    mfxU32      reserved1;
+    mfxU32      MaxSliceSize;
 
     mfxU16      BitrateLimit;           /* tri-state option */
     mfxU16      MBBRC;                  /* tri-state option */
     mfxU16      ExtBRC;                 /* tri-state option */
-    mfxU16      reserved2[18];
+    mfxU16      LookAheadDepth;
+    mfxU16      Trellis;
+    mfxU16      RepeatPPS;              /* tri-state option */
+    mfxU16      BRefType;
+    mfxU16      AdaptiveI;              /* tri-state option */
+    mfxU16      AdaptiveB;              /* tri-state option */
+    mfxU16      LookAheadDS;
+    mfxU16      NumMbPerSlice;
+    mfxU16      SkipFrame;
+    mfxU8       MinQPI;                 /* 1..51, 0 = default */
+    mfxU8       MaxQPI;                 /* 1..51, 0 = default */
+    mfxU8       MinQPP;                 /* 1..51, 0 = default */
+    mfxU8       MaxQPP;                 /* 1..51, 0 = default */
+    mfxU8       MinQPB;                 /* 1..51, 0 = default */
+    mfxU8       MaxQPB;                 /* 1..51, 0 = default */
+    mfxU16      FixedFrameRate;         /* tri-state option */
+    mfxU16      DisableDeblockingIdc;
+    mfxU16      DisableVUI;
+    mfxU16      BufferingPeriodSEI;
+    mfxU16      reserved2[2];
 } mfxExtCodingOption2;
 
 /* IntraPredBlockSize/InterPredBlockSize */
@@ -467,27 +562,7 @@ enum {
     MFX_CODINGOPTION_ADAPTIVE   =0x30
 };
 
-typedef struct _mfxEncryptedData mfxEncryptedData;
-
-typedef struct {
-     union {
-         mfxEncryptedData* EncryptedData;
-         mfxU32  reserved[6];
-     };
-    mfxI64  DecodeTimeStamp; 
-    mfxU64  TimeStamp;
-    mfxU8*  Data;
-    mfxU32  DataOffset;
-    mfxU32  DataLength;
-    mfxU32  MaxLength;
-
-    mfxU16  PicStruct;
-    mfxU16  FrameType;
-    mfxU16  DataFlag;
-    mfxU16  reserved2;
-} mfxBitstream;
-
-/* Data Flag */
+/* Data Flag for mfxBitstream*/
 enum {
     MFX_BITSTREAM_COMPLETE_FRAME    = 0x0001,        /* the bitstream contains a complete frame or field pair of data */
     MFX_BITSTREAM_EOS               = 0x0002
@@ -513,7 +588,15 @@ enum {
     MFX_EXTBUFF_AVC_TEMPORAL_LAYERS        = MFX_MAKEFOURCC('A','T','M','L'),
     MFX_EXTBUFF_CODING_OPTION2             = MFX_MAKEFOURCC('C','D','O','2'),
     MFX_EXTBUFF_VPP_IMAGE_STABILIZATION    = MFX_MAKEFOURCC('I','S','T','B'),
-    MFX_EXTBUFF_VPP_PICSTRUCT_DETECTION    = MFX_MAKEFOURCC('I','D','E','T')
+    MFX_EXTBUFF_VPP_PICSTRUCT_DETECTION    = MFX_MAKEFOURCC('I','D','E','T'),
+    MFX_EXTBUFF_ENCODER_CAPABILITY         = MFX_MAKEFOURCC('E','N','C','P'),
+    MFX_EXTBUFF_ENCODER_RESET_OPTION       = MFX_MAKEFOURCC('E','N','R','O'),
+    MFX_EXTBUFF_ENCODED_FRAME_INFO         = MFX_MAKEFOURCC('E','N','F','I'),
+    MFX_EXTBUFF_VPP_COMPOSITE              = MFX_MAKEFOURCC('V','C','M','P'),
+    MFX_EXTBUFF_VPP_VIDEO_SIGNAL_INFO      = MFX_MAKEFOURCC('V','V','S','I'),
+    MFX_EXTBUFF_ENCODER_ROI                = MFX_MAKEFOURCC('E','R','O','I'),
+    MFX_EXTBUFF_VPP_DEINTERLACING          = MFX_MAKEFOURCC('V','P','D','I'),
+    MFX_EXTBUFF_AVC_REFLISTS               = MFX_MAKEFOURCC('R','L','T','S')
 };
 
 /* VPP Conf: Do not use certain algorithms  */
@@ -591,7 +674,7 @@ typedef struct {
 typedef struct {
     mfxExtBuffer    Header;
     mfxU32  reserved[5];
-    mfxU16  reserved1;
+    mfxU16  SkipFrame;
 
     mfxU16  QP; /* per frame QP */
 
@@ -683,37 +766,6 @@ typedef enum {
     MFX_SKIPMODE_LESS=2
 } mfxSkipMode;
 
-/* Library initialization and deinitialization */
-typedef mfxI32 mfxIMPL;
-#define MFX_IMPL_BASETYPE(x) (0x00ff & (x))
-
-enum  {
-    MFX_IMPL_AUTO         = 0x0000,  /* Auto Selection/In or Not Supported/Out */
-    MFX_IMPL_SOFTWARE     = 0x0001,  /* Pure Software Implementation */
-    MFX_IMPL_HARDWARE     = 0x0002,  /* Hardware Accelerated Implementation (default device) */
-    MFX_IMPL_AUTO_ANY     = 0x0003,  /* Auto selection of any hardware/software implementation */
-    MFX_IMPL_HARDWARE_ANY = 0x0004,  /* Auto selection of any hardware implementation */
-    MFX_IMPL_HARDWARE2    = 0x0005,  /* Hardware accelerated implementation (2nd device) */
-    MFX_IMPL_HARDWARE3    = 0x0006,  /* Hardware accelerated implementation (3rd device) */
-    MFX_IMPL_HARDWARE4    = 0x0007,  /* Hardware accelerated implementation (4th device) */
-
-    MFX_IMPL_VIA_ANY      = 0x0100,
-    MFX_IMPL_VIA_D3D9     = 0x0200,
-    MFX_IMPL_VIA_D3D11    = 0x0300,
-    MFX_IMPL_VIA_VAAPI    = 0x0400,
-
-    MFX_IMPL_UNSUPPORTED  = 0x0000  /* One of the MFXQueryIMPL returns */
-};
-
-/* Version Info */
-typedef union {
-    struct {
-        mfxU16  Minor;
-        mfxU16  Major;
-    };
-    mfxU32  Version;
-} mfxVersion;
-
 typedef struct {
     mfxExtBuffer    Header;
     mfxU8           *SPSBuffer;
@@ -723,15 +775,6 @@ typedef struct {
     mfxU16          SPSId;
     mfxU16          PPSId;
 } mfxExtCodingOptionSPSPPS;
-
-/* session priority */
-typedef enum
-{
-    MFX_PRIORITY_LOW = 0,
-    MFX_PRIORITY_NORMAL = 1,
-    MFX_PRIORITY_HIGH = 2
-
-} mfxPriority;
 
 typedef struct {
     mfxExtBuffer    Header;
@@ -769,10 +812,12 @@ typedef struct {
         mfxU32      FrameOrder;
         mfxU16      PicStruct;
         mfxU16      ViewId;
-        mfxU32      reserved[2];
+        mfxU16      LongTermIdx;
+        mfxU16      reserved[3];
     } PreferredRefList[32], RejectedRefList[16], LongTermRefList[16];
 
-    mfxU32      reserved[8];
+    mfxU16      ApplyLongTermIdx;
+    mfxU16      reserved[15];
 } mfxExtAVCRefListCtrl;
 
 enum {
@@ -833,6 +878,148 @@ typedef struct {
         mfxU16 reserved[3];
     }Layer[8];
 } mfxExtAvcTemporalLayers;
+
+typedef struct {
+    mfxExtBuffer Header;
+
+    mfxU32      MBPerSec;
+    mfxU16      reserved[58];
+} mfxExtEncoderCapability;
+
+typedef struct {
+    mfxExtBuffer Header;
+
+    mfxU16      StartNewSequence;
+    mfxU16      reserved[11];
+} mfxExtEncoderResetOption;
+
+typedef struct {
+    mfxExtBuffer    Header; 
+
+    mfxU32          FrameOrder;
+    mfxU16          PicStruct;
+    mfxU16          LongTermIdx;
+    mfxU32          MAD;
+    mfxU16          BRCPanicMode;
+    mfxU16          QP;
+    mfxU32          SecondFieldOffset;
+    mfxU16          reserved[2];
+
+    struct {
+            mfxU32      FrameOrder;
+            mfxU16      PicStruct;
+            mfxU16      LongTermIdx;
+            mfxU16      reserved[4];
+    } UsedRefListL0[32], UsedRefListL1[32];
+} mfxExtAVCEncodedFrameInfo;
+
+typedef struct mfxVPPCompInputStream {
+        mfxU32  DstX;
+        mfxU32  DstY;
+        mfxU32  DstW;
+        mfxU32  DstH;
+
+        mfxU16  LumaKeyEnable;
+        mfxU16  LumaKeyMin;
+        mfxU16  LumaKeyMax;
+
+        mfxU16  GlobalAlphaEnable;
+        mfxU16  GlobalAlpha;
+
+        mfxU16 PixelAlphaEnable;
+
+        mfxU16  reserved2[18];
+} mfxVPPCompInputStream;     
+
+typedef struct {
+    mfxExtBuffer    Header;
+
+    /* background color*/
+    union {
+        mfxU16   Y;
+        mfxU16   R;
+    };
+    union {
+        mfxU16   U;
+        mfxU16   G;
+    };
+    union {
+        mfxU16   V;
+        mfxU16   B;
+    };
+
+    mfxU16      reserved1[24];
+
+    mfxU16      NumInputStream;
+    mfxVPPCompInputStream *InputStream;     
+} mfxExtVPPComposite;
+
+/* TransferMatrix */
+enum {
+    MFX_TRANSFERMATRIX_UNKNOWN = 0,
+    MFX_TRANSFERMATRIX_BT709   = 1,
+    MFX_TRANSFERMATRIX_BT601   = 2
+};
+
+/* NominalRange */
+enum {
+    MFX_NOMINALRANGE_UNKNOWN   = 0,
+    MFX_NOMINALRANGE_0_255     = 1,
+    MFX_NOMINALRANGE_16_235    = 2
+};
+
+typedef struct {
+    mfxExtBuffer    Header;
+    mfxU16          reserved1[4];
+
+    struct  {
+        mfxU16  TransferMatrix;
+        mfxU16  NominalRange;
+        mfxU16  reserved2[6];
+    } In, Out;
+} mfxExtVPPVideoSignalInfo;
+
+typedef struct {
+    mfxExtBuffer    Header;
+
+    mfxU16  NumROI;
+    mfxU16  reserved1[11];
+
+    struct  {
+        mfxU32  Left;
+        mfxU32  Top;
+        mfxU32  Right;
+        mfxU32  Bottom;
+
+        mfxI16  Priority;
+        mfxU16  reserved2[7];
+    } ROI[256];
+} mfxExtEncoderROI;
+
+enum {
+    MFX_DEINTERLACING_BOB      = 0x0001,
+    MFX_DEINTERLACING_ADVANCED = 0x0002
+};
+
+typedef struct {
+    mfxExtBuffer    Header;
+    mfxU16  Mode;
+    mfxU16  reserved[11];
+} mfxExtVPPDeinterlacing;
+
+typedef struct {
+    mfxExtBuffer    Header;
+    mfxU16          NumRefIdxL0Active;
+    mfxU16          NumRefIdxL1Active;
+    mfxU16          reserved[2];
+
+    struct mfxRefPic{
+        mfxU32      FrameOrder;
+        mfxU16      PicStruct;
+        mfxU16      reserved[5];
+    } RefPicList0[32], RefPicList1[32];
+
+}mfxExtAVCRefLists;
 
 #ifdef __cplusplus
 } // extern "C"
