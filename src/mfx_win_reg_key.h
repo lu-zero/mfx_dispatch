@@ -34,7 +34,7 @@ File Name: mfx_win_reg_key.h
 #if defined(_WIN32) || defined(_WIN64)
 
 #include <windows.h>
-#include "mfxplugin.h"
+#include "mfx/mfxplugin.h"
 #include "mfx_dispatcher_log.h"
 
 namespace MFX {
