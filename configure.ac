@@ -2,7 +2,7 @@ AC_PREREQ([2.53])
 
 AC_INIT([libmfx], [1.7])
 AC_CONFIG_SRCDIR([src/mfx_dispatcher.cpp])
-AM_INIT_AUTOMAKE([foreign])
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_CANONICAL_HOST
 
