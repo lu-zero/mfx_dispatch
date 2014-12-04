@@ -29,7 +29,8 @@ libmfx_la_SOURCES += \
     src/mfx_dxva2_device.cpp         \
     src/mfx_library_iterator.cpp     \
     src/mfx_load_dll.cpp             \
-    src/mfx_win_reg_key.cpp
+    src/mfx_win_reg_key.cpp          \
+    src/mfx_plugin_hive.cpp
 else
 libmfx_la_SOURCES += \
     src/mfx_va_glue.c                  \
