@@ -35,7 +35,7 @@ File Name: mfx_dxva2_device.h
 #include <windows.h>
 #endif // #if defined(_WIN32) || defined(_WIN64)
 
-#include <mfxdefs.h>
+#include <mfx/mfxdefs.h>
 
 #ifdef DXVA2DEVICE_LOG
 #include <stdio.h>
