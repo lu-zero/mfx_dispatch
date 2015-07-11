@@ -60,6 +60,8 @@ pkginclude_HEADERS = \
 	mfx/mfxstructures.h              \
 	mfx/mfxvp8.h                     \
 	mfx/mfxvstructures.h             \
-	mfx/mfxvideo.h
+	mfx/mfxvideo.h			 \
+	mfx/mfxaudio.h			 \
+	mfx/mfxastructures.h
 
 pkgincludedir = $(includedir)/mfx
