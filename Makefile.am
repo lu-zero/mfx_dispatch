@@ -48,14 +48,18 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libmfx.pc
 
 pkginclude_HEADERS = \
-	mfx/mfxsession.h                 \
+	mfx/mfxcommon.h                  \
 	mfx/mfxdefs.h                    \
-	mfx/mfxla.h                      \
 	mfx/mfxenc.h                     \
+	mfx/mfxjpeg.h                    \
+	mfx/mfxla.h                      \
+	mfx/mfxmvc.h                     \
+	mfx/mfxpak.h                     \
 	mfx/mfxplugin.h                  \
-	mfx/mfxcommon.h              	 \
-	mfx/mfxvstructures.h             \
+	mfx/mfxsession.h                 \
 	mfx/mfxstructures.h              \
+	mfx/mfxvp8.h                     \
+	mfx/mfxvstructures.h             \
 	mfx/mfxvideo.h
 
 pkgincludedir = $(includedir)/mfx

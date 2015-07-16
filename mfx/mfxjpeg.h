@@ -1,6 +1,6 @@
 /******************************************************************************* *\
 
-Copyright (C) 2014 Intel Corporation.  All rights reserved.
+Copyright (C) 2010-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -24,81 +24,84 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-File Name: mfxla.h
+File Name: mfxjpeg.h
 
 *******************************************************************************/
-#ifndef __MFXLA_H__
-#define __MFXLA_H__
+#ifndef __MFX_JPEG_H__
+#define __MFX_JPEG_H__
+
 #include "mfxdefs.h"
-#include "mfxvstructures.h"
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif /* __cplusplus */
 
-
-enum 
-{
-    MFX_EXTBUFF_LOOKAHEAD_CTRL  =   MFX_MAKEFOURCC('L','A','C','T'),
-    MFX_EXTBUFF_LOOKAHEAD_STAT  =   MFX_MAKEFOURCC('L','A','S','T'),
+/* CodecId */
+enum {
+    MFX_CODEC_JPEG    = MFX_MAKEFOURCC('J','P','E','G')
 };
 
-
-typedef struct
+/* CodecProfile, CodecLevel */
+enum
 {
-    mfxExtBuffer    Header;
-    mfxU16  LookAheadDepth;
-    mfxU16  DependencyDepth;
-    mfxU16  DownScaleFactor;
-    mfxU16  BPyramid;
+    MFX_PROFILE_JPEG_BASELINE      = 1
+};
 
-    mfxU16  reserved1[23];
-    
-    mfxU16  NumOutStream;
-    struct  mfxStream{
-        mfxU16  Width;
-        mfxU16  Height;
-        mfxU16  reserved2[14];
-    } OutStream[16];
-}mfxExtLAControl;
-
-typedef struct
+enum
 {
-    mfxU16  Width;
-    mfxU16  Height;
+    MFX_ROTATION_0      = 0,
+    MFX_ROTATION_90     = 1,
+    MFX_ROTATION_180    = 2,
+    MFX_ROTATION_270    = 3
+};
 
-    mfxU32  FrameType;
-    mfxU32  FrameDisplayOrder;
-    mfxU32  FrameEncodeOrder;
+enum {
+    MFX_EXTBUFF_JPEG_QT     =   MFX_MAKEFOURCC('J','P','G','Q'),
+    MFX_EXTBUFF_JPEG_HUFFMAN     =   MFX_MAKEFOURCC('J','P','G','H')
+};
 
-    mfxU32  IntraCost;
-    mfxU32  InterCost;
-    mfxU32  DependencyCost;
-    mfxU16  Layer;
-    mfxU16  reserved[23];
+enum {
+    MFX_JPEG_COLORFORMAT_UNKNOWN = 0,
+    MFX_JPEG_COLORFORMAT_YCbCr = 1,
+    MFX_JPEG_COLORFORMAT_RGB = 2
+};
 
-    mfxU64 EstimatedRate[52];
-}mfxLAFrameInfo; 
+enum {
+    MFX_SCANTYPE_UNKNOWN = 0,
+    MFX_SCANTYPE_INTERLEAVED = 1,
+    MFX_SCANTYPE_NONINTERLEAVED = 2
+};
 
-typedef struct  {
+typedef struct {
     mfxExtBuffer    Header;
 
-    mfxU16  reserved[20];
+    mfxU16  reserved[7];
+    mfxU16  NumTable;
 
-    mfxU16  NumAlloc;
-    mfxU16  NumStream;
-    mfxU16  NumFrame;
-    mfxLAFrameInfo   *FrameStat; 
+    mfxU16    Qm[4][64];
+} mfxExtJPEGQuantTables;
 
-    mfxFrameSurface1 *OutSurface;
+typedef struct {
+    mfxExtBuffer    Header;
 
-} mfxExtLAFrameStatistics;
+    mfxU16  reserved[2];
+    mfxU16  NumDCTable;
+    mfxU16  NumACTable;
+
+    struct {
+        mfxU8   Bits[16];
+        mfxU8   Values[12];
+    } DCTables[4];
+
+    struct {
+        mfxU8   Bits[16];
+        mfxU8   Values[162];
+    } ACTables[4];
+} mfxExtJPEGHuffmanTables;
 
 #ifdef __cplusplus
 } // extern "C"
 #endif /* __cplusplus */
 
-
-#endif
-
+#endif // __MFX_JPEG_H__

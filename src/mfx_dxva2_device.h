@@ -35,7 +35,7 @@ File Name: mfx_dxva2_device.h
 #include <windows.h>
 #endif // #if defined(_WIN32) || defined(_WIN64)
 
-#include "mfx/mfxdefs.h"
+#include <mfxdefs.h>
 
 #ifdef DXVA2DEVICE_LOG
 #include <stdio.h>
@@ -43,7 +43,7 @@ File Name: mfx_dxva2_device.h
 #define DXVA2DEVICE_TRACE_OPERATION(expr) expr;
 #else
 #define DXVA2DEVICE_TRACE(expr)
-#define DXVA2DEVICE_TRACE_OPERATION(expr)
+#define DXVA2DEVICE_TRACE_OPERATION(expr) 
 #endif
 
 namespace MFX

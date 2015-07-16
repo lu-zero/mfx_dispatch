@@ -47,7 +47,7 @@ const
 wchar_t * const defaultAudioDLLName[2] = {L"libmfxaudiosw64.dll",
                                           L"libmfxaudiosw64.dll"};
 
-const 
+const
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin64_hw.dll",
                                             L"mfxplugin64_sw.dll"};
 
@@ -60,7 +60,7 @@ const
 wchar_t * const defaultAudioDLLName[2] = {L"libmfxaudiosw32.dll",
                                           L"libmfxaudiosw32.dll"};
 
-const 
+const
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin32_hw.dll",
                                             L"mfxplugin32_sw.dll"};
 
@@ -76,7 +76,7 @@ const
 wchar_t * const defaultAudioDLLName[2] = {L"libmfxaudiosw64_d.dll",
                                           L"libmfxaudiosw64_d.dll"};
 
-const 
+const
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin64_hw_d.dll",
                                             L"mfxplugin64_sw_d.dll"};
 
@@ -90,7 +90,7 @@ const
 wchar_t * const defaultAudioDLLName[2] = {L"libmfxaudiosw32_d.dll",
                                           L"libmfxaudiosw32_d.dll"};
 
-const 
+const
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin32_hw_d.dll",
                                             L"mfxplugin32_sw_d.dll"};
 
@@ -108,13 +108,13 @@ mfxStatus mfx_get_default_dll_name(msdk_disp_char *pPath, size_t pathSize, eMfxI
     {
         return MFX_ERR_NULL_PTR;
     }
-    
+
 
     // there are only 2 implementation with default DLL names
 #if _MSC_VER >= 1400
     return 0 == wcscpy_s(pPath, pathSize, defaultDLLName[implType & 1])
         ? MFX_ERR_NONE : MFX_ERR_UNKNOWN;
-#else    
+#else
     wcscpy(pPath, defaultDLLName[implType & 1]);
     return MFX_ERR_NONE;
 #endif
@@ -132,7 +132,7 @@ mfxStatus mfx_get_default_plugin_name(msdk_disp_char *pPath, size_t pathSize, eM
 #if _MSC_VER >= 1400
     return 0 == wcscpy_s(pPath, pathSize, defaultPluginDLLName[implType & 1])
         ? MFX_ERR_NONE : MFX_ERR_UNKNOWN;
-#else    
+#else
     wcscpy(pPath, defaultPluginDLLName[implType & 1]);
     return MFX_ERR_NONE;
 #endif
@@ -144,12 +144,12 @@ mfxStatus mfx_get_default_audio_dll_name(msdk_disp_char *pPath, size_t pathSize,
     {
         return MFX_ERR_NULL_PTR;
     }
-    
+
     // there are only 2 implementation with default DLL names
 #if _MSC_VER >= 1400
     return 0 == wcscpy_s(pPath, pathSize, defaultAudioDLLName[implType & 1])
         ? MFX_ERR_NONE : MFX_ERR_UNKNOWN;
-#else    
+#else
     wcscpy(pPath, defaultAudioDLLName[implType & 1]);
     return MFX_ERR_NONE;
 #endif
@@ -167,15 +167,15 @@ mfxModuleHandle mfx_dll_load(const msdk_disp_char *pFileName)
 
     // set the silent error mode
     DWORD prevErrorMode = 0;
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__) && !defined(WIN_TRESHOLD_MOBILE)
     SetThreadErrorMode(SEM_FAILCRITICALERRORS, &prevErrorMode);
 #else
     prevErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
     // load the library's module
-    hModule = LoadLibraryW(pFileName);
+    hModule = LoadLibraryExW(pFileName,NULL,0);
     // set the previous error mode
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__) && !defined(WIN_TRESHOLD_MOBILE)
     SetThreadErrorMode(prevErrorMode, NULL);
 #else
     SetErrorMode(prevErrorMode);
@@ -219,7 +219,7 @@ mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName)
 
     // set the silent error mode
     DWORD prevErrorMode = 0;
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__) && !defined(WIN_TRESHOLD_MOBILE)
     SetThreadErrorMode(SEM_FAILCRITICALERRORS, &prevErrorMode);
 #else
     prevErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
@@ -227,7 +227,7 @@ mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName)
     // load the library's module
     GetModuleHandleExW(0, pFileName, (HMODULE*) &hModule);
     // set the previous error mode
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__) && !defined(WIN_TRESHOLD_MOBILE)
     SetThreadErrorMode(prevErrorMode, NULL);
 #else
     SetErrorMode(prevErrorMode);

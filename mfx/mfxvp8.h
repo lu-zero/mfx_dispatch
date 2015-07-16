@@ -1,6 +1,6 @@
 /******************************************************************************* *\
 
-Copyright (C) 2014 Intel Corporation.  All rights reserved.
+Copyright (C) 2007-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -24,81 +24,56 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-File Name: mfxla.h
+File Name: mfxvp8.h
 
 *******************************************************************************/
-#ifndef __MFXLA_H__
-#define __MFXLA_H__
+#ifndef __MFXVP8_H__
+#define __MFXVP8_H__
+
 #include "mfxdefs.h"
-#include "mfxvstructures.h"
 
 #ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
+extern "C" {
+#endif
 
-
-enum 
-{
-    MFX_EXTBUFF_LOOKAHEAD_CTRL  =   MFX_MAKEFOURCC('L','A','C','T'),
-    MFX_EXTBUFF_LOOKAHEAD_STAT  =   MFX_MAKEFOURCC('L','A','S','T'),
+enum {
+    MFX_CODEC_VP8 = MFX_MAKEFOURCC('V','P','8',' '),
 };
 
+/* CodecProfile*/
+enum {
+    MFX_PROFILE_VP8_0                       = 0+1, 
+    MFX_PROFILE_VP8_1                       = 1+1,
+    MFX_PROFILE_VP8_2                       = 2+1,
+    MFX_PROFILE_VP8_3                       = 3+1,
+};
 
-typedef struct
-{
-    mfxExtBuffer    Header;
-    mfxU16  LookAheadDepth;
-    mfxU16  DependencyDepth;
-    mfxU16  DownScaleFactor;
-    mfxU16  BPyramid;
+/* Extended Buffer Ids */
+enum {
+    MFX_EXTBUFF_VP8_CODING_OPTION =   MFX_MAKEFOURCC('V','P','8','E'),
+};
 
-    mfxU16  reserved1[23];
-    
-    mfxU16  NumOutStream;
-    struct  mfxStream{
-        mfxU16  Width;
-        mfxU16  Height;
-        mfxU16  reserved2[14];
-    } OutStream[16];
-}mfxExtLAControl;
-
-typedef struct
-{
-    mfxU16  Width;
-    mfxU16  Height;
-
-    mfxU32  FrameType;
-    mfxU32  FrameDisplayOrder;
-    mfxU32  FrameEncodeOrder;
-
-    mfxU32  IntraCost;
-    mfxU32  InterCost;
-    mfxU32  DependencyCost;
-    mfxU16  Layer;
-    mfxU16  reserved[23];
-
-    mfxU64 EstimatedRate[52];
-}mfxLAFrameInfo; 
-
-typedef struct  {
+typedef struct { 
     mfxExtBuffer    Header;
 
-    mfxU16  reserved[20];
-
-    mfxU16  NumAlloc;
-    mfxU16  NumStream;
-    mfxU16  NumFrame;
-    mfxLAFrameInfo   *FrameStat; 
-
-    mfxFrameSurface1 *OutSurface;
-
-} mfxExtLAFrameStatistics;
+    mfxU16   Version;
+    mfxU16   EnableMultipleSegments;
+    mfxU16   LoopFilterType;
+    mfxU16   LoopFilterLevel[4];
+    mfxU16   SharpnessLevel;
+    mfxU16   NumTokenPartitions;
+    mfxI16   LoopFilterRefTypeDelta[4];
+    mfxI16   LoopFilterMbModeDelta[4];
+    mfxI16   SegmentQPDelta[4];
+    mfxI16   CoeffTypeQPDelta[5];
+    mfxU16   WriteIVFHeaders;
+    mfxU32   NumFramesForIVFHeader;
+    mfxU16   reserved[223];
+} mfxExtVP8CodingOption;
 
 #ifdef __cplusplus
 } // extern "C"
-#endif /* __cplusplus */
-
+#endif
 
 #endif
 

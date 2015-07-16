@@ -1,6 +1,6 @@
 /******************************************************************************* *\
 
-Copyright (C) 2014 Intel Corporation.  All rights reserved.
+Copyright (C) 2010-2013 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -24,81 +24,86 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-File Name: mfxla.h
+File Name: mfxmvc.h
 
 *******************************************************************************/
-#ifndef __MFXLA_H__
-#define __MFXLA_H__
+#ifndef __MFXMVC_H__
+#define __MFXMVC_H__
+
 #include "mfxdefs.h"
-#include "mfxvstructures.h"
 
 #ifdef __cplusplus
-extern "C"
-{
-#endif /* __cplusplus */
+extern "C" {
+#endif
 
-
-enum 
-{
-    MFX_EXTBUFF_LOOKAHEAD_CTRL  =   MFX_MAKEFOURCC('L','A','C','T'),
-    MFX_EXTBUFF_LOOKAHEAD_STAT  =   MFX_MAKEFOURCC('L','A','S','T'),
+/* CodecProfile, CodecLevel */
+enum {
+    /* MVC profiles */
+    MFX_PROFILE_AVC_MULTIVIEW_HIGH =118,
+    MFX_PROFILE_AVC_STEREO_HIGH    =128
 };
 
-
-typedef struct
-{
-    mfxExtBuffer    Header;
-    mfxU16  LookAheadDepth;
-    mfxU16  DependencyDepth;
-    mfxU16  DownScaleFactor;
-    mfxU16  BPyramid;
-
-    mfxU16  reserved1[23];
-    
-    mfxU16  NumOutStream;
-    struct  mfxStream{
-        mfxU16  Width;
-        mfxU16  Height;
-        mfxU16  reserved2[14];
-    } OutStream[16];
-}mfxExtLAControl;
-
-typedef struct
-{
-    mfxU16  Width;
-    mfxU16  Height;
-
-    mfxU32  FrameType;
-    mfxU32  FrameDisplayOrder;
-    mfxU32  FrameEncodeOrder;
-
-    mfxU32  IntraCost;
-    mfxU32  InterCost;
-    mfxU32  DependencyCost;
-    mfxU16  Layer;
-    mfxU16  reserved[23];
-
-    mfxU64 EstimatedRate[52];
-}mfxLAFrameInfo; 
+/* Extended Buffer Ids */
+enum {
+    MFX_EXTBUFF_MVC_SEQ_DESC =   MFX_MAKEFOURCC('M','V','C','D'),
+    MFX_EXTBUFF_MVC_TARGET_VIEWS    =   MFX_MAKEFOURCC('M','V','C','T')
+};
 
 typedef struct  {
+    mfxU16 ViewId;
+
+    mfxU16 NumAnchorRefsL0;
+    mfxU16 NumAnchorRefsL1;
+    mfxU16 AnchorRefL0[16];
+    mfxU16 AnchorRefL1[16];
+
+    mfxU16 NumNonAnchorRefsL0;
+    mfxU16 NumNonAnchorRefsL1;
+    mfxU16 NonAnchorRefL0[16];
+    mfxU16 NonAnchorRefL1[16];
+} mfxMVCViewDependency;
+
+typedef struct {
+    mfxU16 TemporalId;
+    mfxU16 LevelIdc;
+
+    mfxU16 NumViews;
+    mfxU16 NumTargetViews;
+    mfxU16 *TargetViewId;
+} mfxMVCOperationPoint;
+
+typedef struct  {
+    mfxExtBuffer Header;
+
+    mfxU32 NumView;
+    mfxU32 NumViewAlloc;
+    mfxMVCViewDependency *View;
+
+    mfxU32 NumViewId;
+    mfxU32 NumViewIdAlloc;
+    mfxU16 *ViewId;
+
+    mfxU32 NumOP;
+    mfxU32 NumOPAlloc;
+    mfxMVCOperationPoint *OP;
+
+    mfxU16 NumRefsTotal;
+    mfxU32 Reserved[16];
+
+} mfxExtMVCSeqDesc;
+
+typedef struct {
     mfxExtBuffer    Header;
 
-    mfxU16  reserved[20];
+    mfxU16 TemporalId;
+    mfxU32 NumView;
+    mfxU16 ViewId[1024];
+} mfxExtMVCTargetViews ;
 
-    mfxU16  NumAlloc;
-    mfxU16  NumStream;
-    mfxU16  NumFrame;
-    mfxLAFrameInfo   *FrameStat; 
-
-    mfxFrameSurface1 *OutSurface;
-
-} mfxExtLAFrameStatistics;
 
 #ifdef __cplusplus
 } // extern "C"
-#endif /* __cplusplus */
-
+#endif
 
 #endif
 

@@ -38,6 +38,10 @@ File Name: mfx_dispatcher.h
 #include "mfx_dispatcher_defs.h"
 #include "mfx_load_plugin.h"
 #include "mfx/mfxenc.h"
+#include "mfx/mfxpak.h"
+
+
+mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXQueryVersion)(mfxSession session, mfxVersion *version);
 
 enum
 {
@@ -66,6 +70,7 @@ enum eFunc
     eMFXCloneSession,
     eMFXSetPriority,
     eMFXGetPriority,
+    eMFXInitEx,
 #include "mfx_exposed_functions_list.h"
     eVideoFuncTotal
 };
@@ -115,7 +120,7 @@ struct MFX_DISP_HANDLE
     ~MFX_DISP_HANDLE(void);
 
     // Load the library's module
-    mfxStatus LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImplType implType, mfxIMPL impl, mfxIMPL implInterface);
+    mfxStatus LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImplType implType, mfxIMPL impl, mfxIMPL implInterface, mfxInitParam &par);
     // Unload the library's module
     mfxStatus UnLoadSelectedDLL(void);
 

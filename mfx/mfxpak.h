@@ -24,11 +24,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-File Name: mfxla.h
+File Name: mfxpak.h
 
 *******************************************************************************/
-#ifndef __MFXLA_H__
-#define __MFXLA_H__
+#ifndef __MFXPAK_H__
+#define __MFXPAK_H__
 #include "mfxdefs.h"
 #include "mfxvstructures.h"
 
@@ -37,63 +37,38 @@ extern "C"
 {
 #endif /* __cplusplus */
 
+typedef struct {
+    mfxU32  reserved[32];
 
-enum 
-{
-    MFX_EXTBUFF_LOOKAHEAD_CTRL  =   MFX_MAKEFOURCC('L','A','C','T'),
-    MFX_EXTBUFF_LOOKAHEAD_STAT  =   MFX_MAKEFOURCC('L','A','S','T'),
-};
+    mfxFrameSurface1 *InSurface;
 
+    mfxU16  NumFrameL0;
+    mfxFrameSurface1 **L0Surface;
+    mfxU16  NumFrameL1;
+    mfxFrameSurface1 **L1Surface;
 
-typedef struct
-{
-    mfxExtBuffer    Header;
-    mfxU16  LookAheadDepth;
-    mfxU16  DependencyDepth;
-    mfxU16  DownScaleFactor;
-    mfxU16  BPyramid;
+    mfxU16  NumExtParam;
+    mfxExtBuffer    **ExtParam;
+} mfxPAKInput;
 
-    mfxU16  reserved1[23];
-    
-    mfxU16  NumOutStream;
-    struct  mfxStream{
-        mfxU16  Width;
-        mfxU16  Height;
-        mfxU16  reserved2[14];
-    } OutStream[16];
-}mfxExtLAControl;
-
-typedef struct
-{
-    mfxU16  Width;
-    mfxU16  Height;
-
-    mfxU32  FrameType;
-    mfxU32  FrameDisplayOrder;
-    mfxU32  FrameEncodeOrder;
-
-    mfxU32  IntraCost;
-    mfxU32  InterCost;
-    mfxU32  DependencyCost;
-    mfxU16  Layer;
-    mfxU16  reserved[23];
-
-    mfxU64 EstimatedRate[52];
-}mfxLAFrameInfo; 
-
-typedef struct  {
-    mfxExtBuffer    Header;
-
-    mfxU16  reserved[20];
-
-    mfxU16  NumAlloc;
-    mfxU16  NumStream;
-    mfxU16  NumFrame;
-    mfxLAFrameInfo   *FrameStat; 
+typedef struct {
+    mfxBitstream     *Bs; 
 
     mfxFrameSurface1 *OutSurface;
 
-} mfxExtLAFrameStatistics;
+    mfxU16            NumExtParam;
+    mfxExtBuffer    **ExtParam;
+} mfxPAKOutput;
+
+typedef struct _mfxSession *mfxSession;
+mfxStatus MFX_CDECL MFXVideoPAK_Query(mfxSession session, mfxVideoParam *in, mfxVideoParam *out);
+mfxStatus MFX_CDECL MFXVideoPAK_QueryIOSurf(mfxSession session, mfxVideoParam *par, mfxFrameAllocRequest *request);
+mfxStatus MFX_CDECL MFXVideoPAK_Init(mfxSession session, mfxVideoParam *par);
+mfxStatus MFX_CDECL MFXVideoPAK_Reset(mfxSession session, mfxVideoParam *par);
+mfxStatus MFX_CDECL MFXVideoPAK_Close(mfxSession session);
+
+mfxStatus MFX_CDECL MFXVideoPAK_ProcessFrameAsync(mfxSession session, mfxPAKInput *in, mfxPAKOutput *out,  mfxSyncPoint *syncp);
+
 
 #ifdef __cplusplus
 } // extern "C"
@@ -101,4 +76,3 @@ typedef struct  {
 
 
 #endif
-

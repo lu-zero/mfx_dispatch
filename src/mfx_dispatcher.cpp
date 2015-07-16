@@ -94,7 +94,7 @@ mfxStatus MFX_DISP_HANDLE::Close(void)
 } // mfxStatus MFX_DISP_HANDLE::Close(void)
 
 mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImplType implType,
-                                           mfxIMPL impl, mfxIMPL implInterface)
+                                           mfxIMPL impl, mfxIMPL implInterface, mfxInitParam &par)
 {
     mfxStatus mfxRes = MFX_ERR_NONE;
 
@@ -117,7 +117,22 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         DISPATCHER_LOG_ERROR((("invalid implementation impl == %s\n"), DispatcherLog_GetMFXImplString(impl).c_str()));
         loadStatus = MFX_ERR_ABORTED;
         return loadStatus;
-    }        
+    }
+    // only mfxExtThreadsParam is allowed
+    if (par.NumExtParam)
+    {
+        if ((par.NumExtParam > 1) || !par.ExtParam)
+        {
+            loadStatus = MFX_ERR_ABORTED;
+            return loadStatus;
+        }
+        if ((par.ExtParam[0]->BufferId != MFX_EXTBUFF_THREADS_PARAM) ||
+            (par.ExtParam[0]->BufferSz != sizeof(mfxExtThreadsParam)))
+        {
+            loadStatus = MFX_ERR_ABORTED;
+            return loadStatus;
+        }
+    }
 
     // close the handle before initialization
     Close();
@@ -131,7 +146,7 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         DISPATCHER_LOG_BLOCK(("invoking LoadLibrary(%S)\n", MSDK2WIDE(pPath)));
         // load the DLL into the memory
         hModule = MFX::mfx_dll_load(pPath);
-        
+
         if (hModule)
         {
             int i;
@@ -220,25 +235,49 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         mfxVersion version(apiVersion);
 
         /* check whether it is audio session or video */
-        int tableIndex = eMFXInit; 
+        bool callOldInit = true; // if true call eMFXInit, if false - eMFXInitEx
         mfxFunctionPointer pFunc;
-        if (impl & MFX_IMPL_AUDIO) 
-        { 
+
+        if (par.ExternalThreads) callOldInit = false;
+        else if (par.NumExtParam) callOldInit = false;
+
+        int tableIndex = (callOldInit) ? eMFXInit : eMFXInitEx;
+
+        if (impl & MFX_IMPL_AUDIO)
+        {
             pFunc = callAudioTable[tableIndex];
-        } 
+        }
         else
         {
             pFunc = callTable[tableIndex];
         }
 
         {
-            DISPATCHER_LOG_BLOCK( ("MFXInit(%s,ver=%u.%u,session=0x%p)\n"
-                                , DispatcherLog_GetMFXImplString(impl| implInterface).c_str()
-                                , apiVersion.Major
-                                , apiVersion.Minor
-                                , &session));
-        
-            mfxRes = (*(mfxStatus (MFX_CDECL *) (mfxIMPL, mfxVersion *, mfxSession *)) pFunc) (impl | implInterface, &version, &session);
+            if (callOldInit)
+            {
+                DISPATCHER_LOG_BLOCK(("MFXInit(%s,ver=%u.%u,session=0x%p)\n"
+                                     , DispatcherLog_GetMFXImplString(impl | implInterface).c_str()
+                                     , apiVersion.Major
+                                     , apiVersion.Minor
+                                     , &session));
+
+                mfxRes = (*(mfxStatus(MFX_CDECL *) (mfxIMPL, mfxVersion *, mfxSession *)) pFunc) (impl | implInterface, &version, &session);
+            }
+            else
+            {
+                DISPATCHER_LOG_BLOCK(("MFXInitEx(%s,ver=%u.%u,ExtThreads=%d,session=0x%p)\n"
+                                     , DispatcherLog_GetMFXImplString(impl | implInterface).c_str()
+                                     , apiVersion.Major
+                                     , apiVersion.Minor
+                                     , par.ExternalThreads
+                                     , &session));
+
+                mfxInitParam initPar = par;
+                // adjusting user parameters
+                initPar.Implementation = impl | implInterface;
+                initPar.Version = version;
+                mfxRes = (*(mfxStatus(MFX_CDECL *) (mfxInitParam, mfxSession *)) pFunc) (initPar, &session);
+            }
         }
 
         if (MFX_ERR_NONE != mfxRes)
@@ -247,7 +286,8 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         }
         else
         {
-            mfxRes = MFXQueryVersion((mfxSession) this, &actualApiVersion);
+            mfxRes = DISPATCHER_EXPOSED_PREFIX(MFXQueryVersion)((mfxSession) this, &actualApiVersion);
+
             if (MFX_ERR_NONE != mfxRes)
             {
                 DISPATCHER_LOG_ERROR((("MFXQueryVersion returned: %d, skiped this library\n"), mfxRes))
@@ -278,12 +318,12 @@ mfxStatus MFX_DISP_HANDLE::UnLoadSelectedDLL(void)
     if (session)
     {
         /* check whether it is audio session or video */
-        int tableIndex = eMFXClose; 
+        int tableIndex = eMFXClose;
         mfxFunctionPointer pFunc;
-        if (impl & MFX_IMPL_AUDIO) 
-        { 
+        if (impl & MFX_IMPL_AUDIO)
+        {
             pFunc = callAudioTable[tableIndex];
-        } 
+        }
         else
         {
             pFunc = callTable[tableIndex];
