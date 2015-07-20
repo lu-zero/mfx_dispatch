@@ -244,7 +244,7 @@ static mfxU32 mfx_list_libraries(const char* path, bool search_hw, struct mfx_li
 namespace MFX
 {
 
-mfxStatus GetImplementationType(const mfxU32 adapterNum, mfxIMPL *pImplInterface, mfxU32 *pVendorID, mfxU32 *pDeviceID)
+mfxStatus SelectImplementationType(const mfxU32 adapterNum, mfxIMPL *pImplInterface, mfxU32 *pVendorID, mfxU32 *pDeviceID)
 {
     mfx_disp_adapters* adapters = NULL;
     int adapters_num = mfx_init_adapters(&adapters);
@@ -383,7 +383,7 @@ mfxStatus MFXLibraryIterator::SelectDLLVersion(char *pPath, size_t pathSize,
 mfxIMPL MFXLibraryIterator::GetImplementationType()
 {
     mfxIMPL implInterface;
-    MFX::GetImplementationType(0, &implInterface, NULL, NULL);
+    MFX::SelectImplementationType(0, &implInterface, NULL, NULL);
     return implInterface;
 }
 
