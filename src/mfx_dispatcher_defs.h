@@ -74,12 +74,6 @@ inline std::wstring getWideString(const char * string)
 
 #endif
 
-#ifdef __GNUC__
-#define  sscanf_s  sscanf
-#define  swscanf_s swscanf
-#endif
-
-
 // declare library module's handle
 typedef void * mfxModuleHandle;
 
