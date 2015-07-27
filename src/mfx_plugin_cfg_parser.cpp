@@ -34,6 +34,7 @@ File Name: mfx_plugin_cfg_parser.cpp
 #include "mfx_dispatcher_log.h"
 #include <stdlib.h>
 #include <ctype.h>
+#include <cstdio>
 
 const int guidLen = 16;
 
