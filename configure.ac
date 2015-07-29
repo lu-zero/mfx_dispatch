@@ -31,7 +31,7 @@ AC_SUBST(MFX_LT_REVISION)
 
 AC_PROG_CXX
 
-LT_INIT
+LT_INIT([disable-shared])
 
 AC_CONFIG_MACRO_DIR([m4])
 
