@@ -276,7 +276,7 @@ MFX::MFXPluginsInFS::MFXPluginsInFS( mfxVersion currentAPIVersion )
         for(i = 0; i != pluginDirNameLen / charsPermfxU8; i++)
         {
             mfxU32 hexNum = 0;
-            if (1 != swscanf_s(find_data.cFileName + charsPermfxU8 * i, L"%2x", &hexNum))
+            if (1 != swscanf(find_data.cFileName + charsPermfxU8 * i, L"%2x", &hexNum))
             {
                 // it is ok to have non-plugin subdirs with length 32
                 //TRACE_HIVE_INFO("folder name \"%S\" is not a valid GUID string\n", find_data.cFileName);
@@ -377,7 +377,7 @@ bool MFX::MFXPluginsInFS::ParseKVPair( msdk_disp_char * key, msdk_disp_char* val
     if (0 != wcsstr(key, PlgVerKeyName))
     {
         mfxU32 version ;
-        if (0 == swscanf_s(value, L"%d", &version))
+        if (0 == swscanf(value, L"%d", &version))
         {
             return false;
         }
@@ -397,7 +397,7 @@ bool MFX::MFXPluginsInFS::ParseKVPair( msdk_disp_char * key, msdk_disp_char* val
     if (0 != wcsstr(key, APIVerKeyName))
     {
         mfxU32 APIversion;
-        if (0 == swscanf_s(value, L"%d", &APIversion))
+        if (0 == swscanf(value, L"%d", &APIversion))
         {
             return false;
         }
