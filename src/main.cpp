@@ -518,9 +518,6 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXClose)(mfxSession session)
     // check error(s)
     if (pHandle)
     {
-#ifdef MFX_HAVE_LINUX
-        mfx_deallocate_va(pHandle->internal_hwctx);
-#endif
         try
         {
             // unload the DLL library
@@ -530,6 +527,9 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXClose)(mfxSession session)
             // can't unload library in that case.
             if (MFX_ERR_UNDEFINED_BEHAVIOR != mfxRes)
             {
+#ifdef MFX_HAVE_LINUX
+                mfx_deallocate_va(pHandle->internal_hwctx);
+#endif
                 // release the handle
                 delete pHandle;
             }
