@@ -27,8 +27,8 @@
 #ifndef MFX_VA_GLUE_H
 #define MFX_VA_GLUE_H
 
-mfxStatus mfx_allocate_va(mfxSession session);
+void *mfx_allocate_va(mfxSession session);
 
-void mfx_deallocate_va(mfxSession session);
+void mfx_deallocate_va(void *handle);
 
 #endif /* MFX_VA_GLUE_H */

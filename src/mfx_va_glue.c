@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include <mfx/mfxvideo.h>
 
@@ -36,7 +37,7 @@
 #include <va/va_drmcommon.h>
 #include <va/va_backend.h>
 
-mfxStatus mfx_allocate_va(mfxSession session)
+void *mfx_allocate_va(mfxSession session)
 {
     char *card = getenv("MFX_DRM_CARD");
     int ret, fd;
@@ -44,9 +45,9 @@ mfxStatus mfx_allocate_va(mfxSession session)
     VADisplay display;
 
     if (!card)
-        card = "/dev/dri/card0";
+        card = (char*)"/dev/dri/card0";
     if ((fd = open(card, O_RDWR)) < 0)
-        return MFX_ERR_NOT_INITIALIZED;
+        return NULL;
 
     if (!(display = vaGetDisplayDRM(fd)))
         goto fail;
@@ -54,30 +55,32 @@ mfxStatus mfx_allocate_va(mfxSession session)
     if (vaInitialize(display, &major, &minor) < 0)
         goto fail;
 
-    return MFXVideoCORE_SetHandle(session, MFX_HANDLE_VA_DISPLAY, display);
+    ret = MFXVideoCORE_SetHandle(session, MFX_HANDLE_VA_DISPLAY, display);
+    if (ret != MFX_ERR_NONE)
+        goto fail;
+    return display;
+
 fail:
     close(fd);
-    return MFX_ERR_DEVICE_LOST;
+    return NULL;
 }
 
-void mfx_deallocate_va(mfxSession session)
+void mfx_deallocate_va(void *handle)
 {
     VADisplayContextP display;
     VADriverContextP driver;
     VADisplay disp;
     struct drm_state *state;
-    int ret;
 
-    ret = MFXVideoCORE_GetHandle(session, MFX_HANDLE_VA_DISPLAY,
-                                 &disp);
-    if (ret != MFX_ERR_NONE)
+    disp = handle;
+    if (!disp)
         return;
 
-    display = disp;
+    display = (VADisplayContextP)disp;
 
     driver = display->pDriverContext;
 
-    state = driver->drm_state;
+    state = (struct drm_state *)driver->drm_state;
 
     close(state->fd);
 

@@ -504,12 +504,6 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInitEx)(mfxInitParam par, mfxSession *ses
     *candidate = 0; // keep this one safe from guard destructor
     *((MFX_DISP_HANDLE **) session) = pHandle;
 
-#ifdef MFX_HAVE_LINUX
-    mfxStatus ret = mfx_allocate_va(*session);
-    if (ret != MFX_ERR_NONE)
-        return ret;
-#endif
-
     return pHandle->loadStatus;
 
 } // mfxStatus MFXInit(mfxIMPL impl, mfxVersion *ver, mfxSession *session)
@@ -525,7 +519,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXClose)(mfxSession session)
     if (pHandle)
     {
 #ifdef MFX_HAVE_LINUX
-        mfx_deallocate_va(session);
+        mfx_deallocate_va(pHandle->internal_hwctx);
 #endif
         try
         {
@@ -907,6 +901,38 @@ FUNCTION(mfxStatus, MFXSetPriority, (mfxSession session, mfxPriority priority), 
 FUNCTION(mfxStatus, MFXGetPriority, (mfxSession session, mfxPriority *priority), (session, priority))
 
 #undef FUNCTION
+
+mfxStatus MFXVideoCORE_SetHandle(mfxSession session, mfxHandleType type, mfxHDL hdl)
+{
+    mfxStatus mfxRes = MFX_ERR_INVALID_HANDLE;
+    MFX_DISP_HANDLE *pHandle = (MFX_DISP_HANDLE *) session;
+    /* get the function's address and make a call */
+    if (pHandle) {
+        mfxStatus (*pFunc)(mfxSession session, mfxHandleType type, mfxHDL hdl) = (mfxStatus (MFX_CDECL *)(mfxSession, mfxHandleType, mfxHDL))pHandle->callTable[eMFXVideoCORE_SetHandle];
+        if (pFunc) {
+            /* get the real session pointer */
+            session = pHandle->session;
+            pHandle->got_user_hwctx = 1;
+            /* pass down the call */
+            mfxRes = pFunc(session, type, hdl);
+        }
+    }
+    return mfxRes;
+}
+
+#ifdef MFX_HAVE_LINUX
+#define INIT_INTERNAL_HWCTX                                     \
+do {                                                            \
+    if (!pHandle->got_user_hwctx && !pHandle->internal_hwctx) { \
+        void *handle = mfx_allocate_va(session);                \
+        if (handle)                                             \
+            pHandle->internal_hwctx = handle;                   \
+    }                                                           \
+} while (0)
+#else
+#define INIT_INTERNAL_HWCTX
+#endif
+
 #define FUNCTION(return_value, func_name, formal_param_list, actual_param_list) \
     return_value DISPATCHER_EXPOSED_PREFIX(func_name) formal_param_list \
 { \
@@ -916,6 +942,7 @@ FUNCTION(mfxStatus, MFXGetPriority, (mfxSession session, mfxPriority *priority),
     if (pHandle) \
 { \
     mfxFunctionPointer pFunc = pHandle->callTable[e##func_name]; \
+    INIT_INTERNAL_HWCTX;\
     if (pFunc) \
 { \
     /* get the real session pointer */ \

@@ -71,6 +71,7 @@ enum eFunc
     eMFXSetPriority,
     eMFXGetPriority,
     eMFXInitEx,
+    eMFXVideoCORE_SetHandle,
 #include "mfx_exposed_functions_list.h"
     eVideoFuncTotal
 };
@@ -162,6 +163,12 @@ struct MFX_DISP_HANDLE
     // function call table
     mfxFunctionPointer callTable[eVideoFuncTotal];
     mfxFunctionPointer callAudioTable[eAudioFuncTotal];
+
+#ifdef MFX_HAVE_LINUX
+    // internal VAAPI context
+    void *internal_hwctx;
+    int   got_user_hwctx;
+#endif
 
 private:
     // Declare assignment operator and copy constructor to prevent occasional assignment
