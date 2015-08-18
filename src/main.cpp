@@ -910,9 +910,11 @@ mfxStatus MFXVideoCORE_SetHandle(mfxSession session, mfxHandleType type, mfxHDL 
     if (pHandle) {
         mfxStatus (*pFunc)(mfxSession session, mfxHandleType type, mfxHDL hdl) = (mfxStatus (MFX_CDECL *)(mfxSession, mfxHandleType, mfxHDL))pHandle->callTable[eMFXVideoCORE_SetHandle];
         if (pFunc) {
+#if MFX_HAVE_LINUX
             /* get the real session pointer */
             session = pHandle->session;
             pHandle->got_user_hwctx = 1;
+#endif
             /* pass down the call */
             mfxRes = pFunc(session, type, hdl);
         }
