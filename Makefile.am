@@ -43,7 +43,7 @@ endif
 
 libmfx_la_LDFLAGS = -no-undefined -static-libgcc -static-libstdc++
 libmfx_la_LDFLAGS += -version-info $(MFX_LT_CURRENT):$(MFX_LT_REVISION):$(MFX_LT_AGE)
-libmfx_la_LIBADD = $(LIBVA_DRM_LIBS) $(LIBVA_X11_LIBS)
+libmfx_la_LIBADD = $(DLLIB) $(LIBVA_DRM_LIBS) $(LIBVA_X11_LIBS)
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libmfx.pc

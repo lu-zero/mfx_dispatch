@@ -10,10 +10,12 @@ AS_CASE([${host_os}],
     [*linux*], [
         AC_DEFINE([MFX_HAVE_LINUX])
         AM_CONDITIONAL([WINDOWS], [false])
+        DLLIB="-ldl"
     ],
     [*mingw32*], [
         AC_DEFINE([MFX_HAVE_WINDOWS])
         AM_CONDITIONAL([WINDOWS], [true])
+        DLLIB=""
     ],
     [AC_MSG_ERROR([${host_os} not supported.])]
 )
@@ -28,6 +30,7 @@ MFX_LT_REVISION=0
 AC_SUBST(MFX_LT_CURRENT)
 AC_SUBST(MFX_LT_AGE)
 AC_SUBST(MFX_LT_REVISION)
+AC_SUBST(DLLIB)
 
 AC_PROG_CXX
 
