@@ -167,6 +167,7 @@ struct MFX_DISP_HANDLE
 #ifdef MFX_HAVE_LINUX
     // internal VAAPI context
     void *internal_hwctx;
+    int   tried_internal_hwctx;
     int   got_user_hwctx;
 #endif
 

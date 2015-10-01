@@ -910,9 +910,9 @@ mfxStatus MFXVideoCORE_SetHandle(mfxSession session, mfxHandleType type, mfxHDL 
     if (pHandle) {
         mfxStatus (*pFunc)(mfxSession session, mfxHandleType type, mfxHDL hdl) = (mfxStatus (MFX_CDECL *)(mfxSession, mfxHandleType, mfxHDL))pHandle->callTable[eMFXVideoCORE_SetHandle];
         if (pFunc) {
-#if MFX_HAVE_LINUX
             /* get the real session pointer */
             session = pHandle->session;
+#ifdef MFX_HAVE_LINUX
             pHandle->got_user_hwctx = 1;
 #endif
             /* pass down the call */
@@ -922,18 +922,18 @@ mfxStatus MFXVideoCORE_SetHandle(mfxSession session, mfxHandleType type, mfxHDL 
     return mfxRes;
 }
 
+static void init_internal_hwctx(mfxSession session)
+{
 #ifdef MFX_HAVE_LINUX
-#define INIT_INTERNAL_HWCTX                                     \
-do {                                                            \
-    if (!pHandle->got_user_hwctx && !pHandle->internal_hwctx) { \
-        void *handle = mfx_allocate_va(session);                \
-        if (handle)                                             \
-            pHandle->internal_hwctx = handle;                   \
-    }                                                           \
-} while (0)
-#else
-#define INIT_INTERNAL_HWCTX
+    MFX_DISP_HANDLE *pHandle = (MFX_DISP_HANDLE *) session;
+    if (!pHandle->got_user_hwctx && !pHandle->tried_internal_hwctx) {
+        void *handle = mfx_allocate_va(session);
+        if (handle)
+            pHandle->internal_hwctx = handle;
+        pHandle->tried_internal_hwctx = 1;
+    }
 #endif
+}
 
 #define FUNCTION(return_value, func_name, formal_param_list, actual_param_list) \
     return_value DISPATCHER_EXPOSED_PREFIX(func_name) formal_param_list \
@@ -944,7 +944,7 @@ do {                                                            \
     if (pHandle) \
 { \
     mfxFunctionPointer pFunc = pHandle->callTable[e##func_name]; \
-    INIT_INTERNAL_HWCTX;\
+    init_internal_hwctx(session); \
     if (pFunc) \
 { \
     /* get the real session pointer */ \

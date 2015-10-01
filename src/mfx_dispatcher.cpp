@@ -59,6 +59,12 @@ MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion) :
     memset(callTable, 0, sizeof(callTable));
     memset(callAudioTable, 0, sizeof(callAudioTable));
 
+#ifdef MFX_HAVE_LINUX
+    internal_hwctx = NULL;
+    tried_internal_hwctx = 0;;
+    got_user_hwctx = 0;
+#endif
+
 } // MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion)
 
 MFX_DISP_HANDLE::~MFX_DISP_HANDLE(void)
