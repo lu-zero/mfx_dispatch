@@ -12,7 +12,7 @@ AS_CASE([${host_os}],
         AM_CONDITIONAL([WINDOWS], [false])
         DLLIB="-ldl"
     ],
-    [*mingw32*], [
+    [*mingw*], [
         AC_DEFINE([MFX_HAVE_WINDOWS])
         AM_CONDITIONAL([WINDOWS], [true])
         DLLIB=""
