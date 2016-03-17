@@ -14,18 +14,32 @@ endif (INTELMEDIASDK_PATH_NOTFOUND)
 
 set(SOURCES
   src/main.cpp
-  src/mfx_critical_section.cpp
-  src/mfx_critical_section_linux.cpp
   src/mfx_dispatcher.cpp
   src/mfx_dispatcher_log.cpp
-  src/mfx_dxva2_device.cpp
   src/mfx_function_table.cpp
-  src/mfx_library_iterator.cpp
-  src/mfx_library_iterator_linux.cpp
-  src/mfx_load_dll.cpp
-  src/mfx_load_dll_linux.cpp
-  src/mfx_win_reg_key.cpp
 )
+
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+  add_definitions(-fPIC)
+  list(APPEND SOURCES
+    src/mfx_library_iterator_linux.cpp
+    src/mfx_load_dll_linux.cpp
+    src/mfx_critical_section_linux.cpp
+  )
+endif (CMAKE_SYSTEM_NAME MATCHES "Linux")
+
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+  add_definitions(-DWIN32)
+  list(APPEND SOURCES
+    src/mfx_critical_section.cpp
+    src/mfx_dxva2_device.cpp
+    src/mfx_library_iterator.cpp
+    src/mfx_load_dll.cpp
+    src/mfx_load_plugin.cpp
+    src/mfx_plugin_hive.cpp
+    src/mfx_win_reg_key.cpp
+  )
+endif (CMAKE_SYSTEM_NAME MATCHES "Windows")
 
 include_directories(
   ${INTELMEDIASDK_PATH}
@@ -35,14 +49,7 @@ include_directories(
 add_definitions(
   -DMFX_VA
   -D_LIB
-  -fPIC
 )
-
-if (CMAKE_SYSTEM_NAME EQUAL 'Windows')
-  add_definitions(
-    -DWIN32
-  )
-endif (CMAKE_SYSTEM_NAME EQUAL 'Windows')
 
 configure_file (${CMAKE_SOURCE_DIR}/libmfx.pc.cmake ${CMAKE_BINARY_DIR}/libmfx.pc @ONLY)
 
