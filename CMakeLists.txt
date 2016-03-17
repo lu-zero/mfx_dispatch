@@ -20,6 +20,7 @@ set(SOURCES
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+  add_definitions(-fPIC)
   list(APPEND SOURCES
     src/mfx_library_iterator_linux.cpp
     src/mfx_load_dll_linux.cpp
@@ -48,7 +49,6 @@ include_directories(
 add_definitions(
   -DMFX_VA
   -D_LIB
-  -fPIC
 )
 
 configure_file (${CMAKE_SOURCE_DIR}/libmfx.pc.cmake ${CMAKE_BINARY_DIR}/libmfx.pc @ONLY)
