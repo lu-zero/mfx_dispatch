@@ -18,7 +18,6 @@ libmfx_la_SOURCES = \
     src/mfx_dispatcher.cpp           \
     src/mfx_dispatcher_log.cpp       \
     src/mfx_load_plugin.cpp          \
-    src/mfx_plugin_cfg_parser.cpp    \
     src/mfx_function_table.cpp
 
 
@@ -52,6 +51,7 @@ pkgconfig_DATA = libmfx.pc
 pkginclude_HEADERS = \
 	mfx/mfxastructures.h		 \
 	mfx/mfxaudio.h			 \
+    mfx/mfxcamera.h                  \
 	mfx/mfxcommon.h                  \
 	mfx/mfxdefs.h                    \
 	mfx/mfxenc.h                     \
@@ -60,10 +60,12 @@ pkginclude_HEADERS = \
 	mfx/mfxmvc.h                     \
 	mfx/mfxpak.h                     \
 	mfx/mfxplugin.h                  \
+    mfx/mfxsc.h                      \
 	mfx/mfxsession.h                 \
 	mfx/mfxstructures.h              \
 	mfx/mfxvideo.h			 \
 	mfx/mfxvp8.h                     \
+	mfx/mfxvp9.h                     \
 	mfx/mfxvstructures.h
 
 pkgincludedir = $(includedir)/mfx

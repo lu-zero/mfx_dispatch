@@ -54,8 +54,6 @@ FUNCTION_DESCRIPTION APIFunc[eVideoFuncTotal] =
     
     {"MFXInitEx", {{1, 14}}},
 
-    {"MFXVideoCORE_SetHandle", {{1, 0}}},
-
 #include "mfx_exposed_functions_list.h"
 };
 
