@@ -1,32 +1,32 @@
 /* ****************************************************************************** *\
- *
- * Copyright (C) 2012-2014 Intel Corporation.  All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- * - Redistributions of source code must retain the above copyright notice,
- * this list of conditions and the following disclaimer.
- * - Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- * - Neither the name of Intel Corporation nor the names of its contributors
- * may be used to endorse or promote products derived from this software
- * without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY INTEL CORPORATION "AS IS" AND ANY EXPRESS OR
- * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL INTEL CORPORATION BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
- * NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
- * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
- * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
- * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- *
- * File Name: main.cpp
- *
- \* ****************************************************************************** */
+
+Copyright (C) 2012-2015 Intel Corporation.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+- Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+- Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+- Neither the name of Intel Corporation nor the names of its contributors
+may be used to endorse or promote products derived from this software
+without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY INTEL CORPORATION "AS IS" AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL INTEL CORPORATION BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+File Name: main.cpp
+
+\* ****************************************************************************** */
 
 #include "mfx_dispatcher.h"
 #include "mfx_load_dll.h"
@@ -194,6 +194,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInitEx)(mfxInitParam par, mfxSession *ses
     MFX_DISP_HANDLE *pHandle;
     msdk_disp_char dllName[MFX_MAX_DLL_PATH];
     MFX::MFXLibraryIterator libIterator;
+
     // there iterators are used only if the caller specified implicit type like AUTO
     mfxU32 curImplIdx, maxImplIdx;
     // particular implementation value
@@ -460,6 +461,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInitEx)(mfxInitParam par, mfxSession *ses
         mfxVersion apiVerActual;
         mfxStatus stsQueryVersion;
         stsQueryVersion = DISPATCHER_EXPOSED_PREFIX(MFXQueryVersion)((mfxSession)pHandle, &apiVerActual);
+
         if (MFX_ERR_NONE !=  stsQueryVersion)
         {
             DISPATCHER_LOG_ERROR((("MFXQueryVersion returned: %d, cannot load plugins\n"), mfxRes))
@@ -901,26 +903,6 @@ FUNCTION(mfxStatus, MFXSetPriority, (mfxSession session, mfxPriority priority), 
 FUNCTION(mfxStatus, MFXGetPriority, (mfxSession session, mfxPriority *priority), (session, priority))
 
 #undef FUNCTION
-
-mfxStatus MFXVideoCORE_SetHandle(mfxSession session, mfxHandleType type, mfxHDL hdl)
-{
-    mfxStatus mfxRes = MFX_ERR_INVALID_HANDLE;
-    MFX_DISP_HANDLE *pHandle = (MFX_DISP_HANDLE *) session;
-    /* get the function's address and make a call */
-    if (pHandle) {
-        mfxStatus (*pFunc)(mfxSession session, mfxHandleType type, mfxHDL hdl) = (mfxStatus (MFX_CDECL *)(mfxSession, mfxHandleType, mfxHDL))pHandle->callTable[eMFXVideoCORE_SetHandle];
-        if (pFunc) {
-            /* get the real session pointer */
-            session = pHandle->session;
-#ifdef MFX_HAVE_LINUX
-            pHandle->got_user_hwctx = 1;
-#endif
-            /* pass down the call */
-            mfxRes = pFunc(session, type, hdl);
-        }
-    }
-    return mfxRes;
-}
 
 static void init_internal_hwctx(mfxSession session)
 {

@@ -31,7 +31,6 @@ File Name: mfx_dispatcher_defs.h
 #pragma once
 #include "mfx/mfxdefs.h"
 #include <cstring>
-#include <cstdio>
 
 #if defined(MFX_DISPATCHER_LOG)
 #include <string>

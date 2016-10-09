@@ -71,7 +71,6 @@ enum eFunc
     eMFXSetPriority,
     eMFXGetPriority,
     eMFXInitEx,
-    eMFXVideoCORE_SetHandle,
 #include "mfx_exposed_functions_list.h"
     eVideoFuncTotal
 };
