@@ -904,9 +904,9 @@ FUNCTION(mfxStatus, MFXGetPriority, (mfxSession session, mfxPriority *priority),
 
 #undef FUNCTION
 
+#ifdef MFX_HAVE_LINUX
 static void init_internal_hwctx(mfxSession session)
 {
-#ifdef MFX_HAVE_LINUX
     MFX_DISP_HANDLE *pHandle = (MFX_DISP_HANDLE *) session;
     if (!pHandle->got_user_hwctx && !pHandle->tried_internal_hwctx) {
         void *handle = mfx_allocate_va(session);
@@ -914,29 +914,53 @@ static void init_internal_hwctx(mfxSession session)
             pHandle->internal_hwctx = handle;
         pHandle->tried_internal_hwctx = 1;
     }
-#endif
 }
 
-#define FUNCTION(return_value, func_name, formal_param_list, actual_param_list) \
-    return_value DISPATCHER_EXPOSED_PREFIX(func_name) formal_param_list \
-{ \
-    mfxStatus mfxRes = MFX_ERR_INVALID_HANDLE; \
-    MFX_DISP_HANDLE *pHandle = (MFX_DISP_HANDLE *) session; \
-    /* get the function's address and make a call */ \
-    if (pHandle) \
-{ \
-    mfxFunctionPointer pFunc = pHandle->callTable[e##func_name]; \
-    init_internal_hwctx(session); \
-    if (pFunc) \
-{ \
-    /* get the real session pointer */ \
-    session = pHandle->session; \
-    /* pass down the call */ \
-    mfxRes = (*(mfxStatus (MFX_CDECL  *) formal_param_list) pFunc) actual_param_list; \
-} \
-} \
-    return mfxRes; \
-}
+#define FUNCTION(return_value, func_name, formal_param_list, actual_param_list)                \
+    return_value DISPATCHER_EXPOSED_PREFIX(func_name) formal_param_list                        \
+    {                                                                                          \
+        mfxStatus mfxRes         = MFX_ERR_INVALID_HANDLE;                                     \
+        MFX_DISP_HANDLE *pHandle = (MFX_DISP_HANDLE *)session;                                 \
+        /* get the function's address and make a call */                                       \
+        if (pHandle)                                                                           \
+        {                                                                                      \
+            mfxFunctionPointer pFunc = pHandle->callTable[e ## func_name];                     \
+            if (pFunc)                                                                         \
+            {                                                                                  \
+                if (eMFXVideoCORE_SetHandle == e ## func_name)                                 \
+                    pHandle->got_user_hwctx = 1;                                               \
+                else                                                                           \
+                    init_internal_hwctx(session);                                              \
+                /* get the real session pointer */                                             \
+                session = pHandle->session;                                                    \
+                /* pass down the call */                                                       \
+                mfxRes = (*(mfxStatus(MFX_CDECL  *) formal_param_list)pFunc)actual_param_list; \
+            }                                                                                  \
+        }                                                                                      \
+        return mfxRes;                                                                         \
+    }
+#else
+
+#define FUNCTION(return_value, func_name, formal_param_list, actual_param_list)                \
+    return_value DISPATCHER_EXPOSED_PREFIX(func_name) formal_param_list                        \
+    {                                                                                          \
+        mfxStatus mfxRes         = MFX_ERR_INVALID_HANDLE;                                     \
+        MFX_DISP_HANDLE *pHandle = (MFX_DISP_HANDLE *)session;                                 \
+        /* get the function's address and make a call */                                       \
+        if (pHandle)                                                                           \
+        {                                                                                      \
+            mfxFunctionPointer pFunc = pHandle->callTable[e ## func_name];                     \
+            if (pFunc)                                                                         \
+            {                                                                                  \
+                /* get the real session pointer */                                             \
+                session = pHandle->session;                                                    \
+                /* pass down the call */                                                       \
+                mfxRes = (*(mfxStatus(MFX_CDECL  *) formal_param_list)pFunc)actual_param_list; \
+            }                                                                                  \
+        }                                                                                      \
+        return mfxRes;                                                                         \
+    }
+#endif
 
 #include "mfx_exposed_functions_list.h"
 #undef FUNCTION
