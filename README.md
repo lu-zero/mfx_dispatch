@@ -13,7 +13,7 @@ Autotooled version of the opensource Intel media sdk dispatcher.
 ```
 autoreconf -i
 ./configure --prefix=/usr
-make -j 18
+make -j$(nproc)
 make install
 ```
 
@@ -34,7 +34,7 @@ This set of build systems let you easily build a mingw-w64 one.
 ``` sh
 autoreconf -i
 ./configure --host=x86_64-w64-mingw32
-make -j
+make -j$(nproc)
 make install DESTDIR=/usr/x86_64-w64-mingw32
 ```
 
@@ -42,7 +42,7 @@ make install DESTDIR=/usr/x86_64-w64-mingw32
 ``` sh
 autoreconf -i
 ./configure --prefix=/mingw64
-make -j 8 install
+make -j$(nproc) install
 ```
 
 **NOTE**: Make sure you set the `prefix` to the correct one for your environment otherwise it will fail to link.
