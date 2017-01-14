@@ -45,6 +45,8 @@ libmfx_la_LDFLAGS = -no-undefined -static-libgcc -static-libstdc++
 libmfx_la_LDFLAGS += -version-info $(MFX_LT_CURRENT):$(MFX_LT_REVISION):$(MFX_LT_AGE)
 libmfx_la_LIBADD = $(DLLIB) $(LIBVA_DRM_LIBS) $(LIBVA_X11_LIBS)
 libmfx_la_CPPFLAGS = $(LIBVA_DRM_CFLAGS) $(LIBVA_X11_CFLAGS) $(AM_CPPFLAGS)
+libmfx_la_CXXFLAGS = $(AM_CXXFLAGS) -fPIC
+libmfx_la_CFLAGS = $(AM_CFLAGS) -fPIC
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libmfx.pc
