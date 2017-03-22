@@ -52,7 +52,7 @@ void *mfx_allocate_va(mfxSession session)
     if (!(display = vaGetDisplayDRM(fd)))
         goto fail;
 
-    if (vaInitialize(display, &major, &minor) < 0)
+    if (vaInitialize(display, &major, &minor) != VA_STATUS_SUCCESS)
         goto fail;
 
     ret = MFXVideoCORE_SetHandle(session, MFX_HANDLE_VA_DISPLAY, display);
