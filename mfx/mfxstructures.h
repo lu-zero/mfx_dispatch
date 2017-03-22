@@ -127,7 +127,13 @@ enum {
 
     MFX_PICSTRUCT_FIELD_REPEATED=0x10,  /* first field repeated, pic_struct=5 or 6 in H.264 */
     MFX_PICSTRUCT_FRAME_DOUBLING=0x20,  /* pic_struct=7 in H.264 */
-    MFX_PICSTRUCT_FRAME_TRIPLING=0x40   /* pic_struct=8 in H.264 */
+    MFX_PICSTRUCT_FRAME_TRIPLING=0x40,  /* pic_struct=8 in H.264 */
+
+    MFX_PICSTRUCT_FIELD_SINGLE      =0x100,
+    MFX_PICSTRUCT_FIELD_TOP         =MFX_PICSTRUCT_FIELD_SINGLE | MFX_PICSTRUCT_FIELD_TFF,
+    MFX_PICSTRUCT_FIELD_BOTTOM      =MFX_PICSTRUCT_FIELD_SINGLE | MFX_PICSTRUCT_FIELD_BFF,
+    MFX_PICSTRUCT_FIELD_PAIRED_PREV =0x200,
+    MFX_PICSTRUCT_FIELD_PAIRED_NEXT =0x400,
 };
 
 /* ColorFormat */
@@ -667,7 +673,11 @@ typedef struct {
     mfxU16      NumRefActiveBL0[8];
     mfxU16      NumRefActiveBL1[8];
 
-    mfxU16      reserved[179];
+    mfxU16      reserved4[5];
+
+    mfxU16      BRCPanicMode;              /* tri-state option */
+
+    mfxU16      reserved[173];
 } mfxExtCodingOption3;
 
 /* IntraPredBlockSize/InterPredBlockSize */
