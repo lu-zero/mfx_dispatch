@@ -307,8 +307,7 @@ MFX::MFXPluginsInFS::MFXPluginsInFS( mfxVersion currentAPIVersion )
         msdk_disp_char_cpy_s(currentModuleName + executableDirLen + pluginDirNameLen + slashLen
             , MAX_PLUGIN_PATH - executableDirLen - pluginDirNameLen - slashLen, pluginCfgFileName);
 
-        FILE *pluginCfgFile = 0;
-        _wfopen_s(&pluginCfgFile, currentModuleName, L"r");
+        FILE *pluginCfgFile = _wfopen(currentModuleName, L"r");
         if (!pluginCfgFile)
         {
             TRACE_HIVE_INFO("in directory \"%S\" no mandatory \"%S\"\n"
