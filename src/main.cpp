@@ -440,18 +440,19 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXInitEx)(mfxInitParam par, mfxSession *ses
     if (allocatedHandle.size() == 0)
         return MFX_ERR_UNSUPPORTED;
 
-    bool NeedSort = false;
-    HandleVector::iterator first = allocatedHandle.begin(),
-                           it = allocatedHandle.begin(),
-                           et = allocatedHandle.end();
-    for (it++; it != et; ++it)
-        if (HandleSort(&(*first), &(*it)) != 0)
-            NeedSort = true;
+    { // sort candidate list
+        bool NeedSort = false;
+        HandleVector::iterator first = allocatedHandle.begin(),
+            it = allocatedHandle.begin(),
+            et = allocatedHandle.end();
+        for (it++; it != et; ++it)
+            if (HandleSort(&(*first), &(*it)) != 0)
+                NeedSort = true;
 
-    // select dll with version with lowest version number still greater or equal to requested
-    if (NeedSort)
-        qsort(&(*allocatedHandle.begin()), allocatedHandle.size(), sizeof(MFX_DISP_HANDLE*), &HandleSort);
-
+        // select dll with version with lowest version number still greater or equal to requested
+        if (NeedSort)
+            qsort(&(*allocatedHandle.begin()), allocatedHandle.size(), sizeof(MFX_DISP_HANDLE*), &HandleSort);
+    }
     HandleVector::iterator candidate = allocatedHandle.begin();
     // check the final result of loading
     try
