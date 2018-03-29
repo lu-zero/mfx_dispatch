@@ -629,7 +629,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXVideoUSER_Load)(mfxSession session, const
         DISPATCHER_LOG_ERROR((("MFXVideoUSER_Load: uid=NULL\n")));
         return MFX_ERR_NULL_PTR;
     }
-    DISPATCHER_LOG_INFO((("MFXVideoUSER_Load: uid="MFXGUIDTYPE()" version=%d\n")
+    DISPATCHER_LOG_INFO((("MFXVideoUSER_Load: uid=" MFXGUIDTYPE() " version=%d\n")
         , MFXGUIDTOHEX(uid)
         , version))
         size_t pluginsChecked = 0;
@@ -643,7 +643,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXVideoUSER_Load)(mfxSession session, const
         //check rest in records
         if (i->PluginVersion < version)
         {
-            DISPATCHER_LOG_INFO((("MFXVideoUSER_Load: registered \"Plugin Version\" for GUID="MFXGUIDTYPE()" is %d, that is smaller that requested\n")
+            DISPATCHER_LOG_INFO((("MFXVideoUSER_Load: registered \"Plugin Version\" for GUID=" MFXGUIDTYPE() " is %d, that is smaller that requested\n")
                 , MFXGUIDTOHEX(uid)
                 , i->PluginVersion))
                 continue;
@@ -710,7 +710,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXVideoUSER_LoadByPath)(mfxSession session,
         return MFX_ERR_NULL_PTR;
     }
 
-    DISPATCHER_LOG_INFO((("MFXVideoUSER_LoadByPath: %S uid="MFXGUIDTYPE()" version=%d\n")
+    DISPATCHER_LOG_INFO((("MFXVideoUSER_LoadByPath: %S uid=" MFXGUIDTYPE() " version=%d\n")
         , MSDK2WIDE(path)
         , MFXGUIDTOHEX(uid)
         , version))
@@ -763,10 +763,10 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXVideoUSER_UnLoad)(mfxSession session, con
     bool bDestroyed = rHandle.pluginFactory.Destroy(*uid);
     if (bDestroyed)
     {
-        DISPATCHER_LOG_INFO((("MFXVideoUSER_UnLoad : plugin with GUID="MFXGUIDTYPE()" unloaded\n"), MFXGUIDTOHEX(uid)));
+        DISPATCHER_LOG_INFO((("MFXVideoUSER_UnLoad : plugin with GUID=" MFXGUIDTYPE() " unloaded\n"), MFXGUIDTOHEX(uid)));
     } else
     {
-        DISPATCHER_LOG_ERROR((("MFXVideoUSER_UnLoad : plugin with GUID="MFXGUIDTYPE()" not found\n"), MFXGUIDTOHEX(uid)));
+        DISPATCHER_LOG_ERROR((("MFXVideoUSER_UnLoad : plugin with GUID=" MFXGUIDTYPE() " not found\n"), MFXGUIDTOHEX(uid)));
     }
 
     return bDestroyed ? MFX_ERR_NONE : MFX_ERR_NOT_FOUND;
@@ -785,7 +785,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXAudioUSER_Load)(mfxSession session, const
         DISPATCHER_LOG_ERROR((("MFXAudioUSER_Load: uid=NULL\n")));
         return MFX_ERR_NULL_PTR;
     }
-    DISPATCHER_LOG_INFO((("MFXAudioUSER_Load: uid="MFXGUIDTYPE()" version=%d\n")
+    DISPATCHER_LOG_INFO((("MFXAudioUSER_Load: uid=" MFXGUIDTYPE() " version=%d\n")
         , MFXGUIDTOHEX(uid)
         , version))
         size_t pluginsChecked = 0;
@@ -803,7 +803,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXAudioUSER_Load)(mfxSession session, const
         //check rest in records
         if (i->PluginVersion < version)
         {
-            DISPATCHER_LOG_INFO((("MFXAudioUSER_Load: registered \"Plugin Version\" for GUID="MFXGUIDTYPE()" is %d, that is smaller that requested\n")
+            DISPATCHER_LOG_INFO((("MFXAudioUSER_Load: registered \"Plugin Version\" for GUID=" MFXGUIDTYPE() " is %d, that is smaller that requested\n")
                 , MFXGUIDTOHEX(uid)
                 , i->PluginVersion))
                 continue;
@@ -851,10 +851,10 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXAudioUSER_UnLoad)(mfxSession session, con
     bool bDestroyed = rHandle.pluginFactory.Destroy(*uid);
     if (bDestroyed)
     {
-        DISPATCHER_LOG_INFO((("MFXAudioUSER_UnLoad : plugin with GUID="MFXGUIDTYPE()" unloaded\n"), MFXGUIDTOHEX(uid)));
+        DISPATCHER_LOG_INFO((("MFXAudioUSER_UnLoad : plugin with GUID=" MFXGUIDTYPE() " unloaded\n"), MFXGUIDTOHEX(uid)));
     } else
     {
-        DISPATCHER_LOG_ERROR((("MFXAudioUSER_UnLoad : plugin with GUID="MFXGUIDTYPE()" not found\n"), MFXGUIDTOHEX(uid)));
+        DISPATCHER_LOG_ERROR((("MFXAudioUSER_UnLoad : plugin with GUID=" MFXGUIDTYPE() " not found\n"), MFXGUIDTOHEX(uid)));
     }
 
     return bDestroyed ? MFX_ERR_NONE : MFX_ERR_NOT_FOUND;
