@@ -34,6 +34,17 @@ AC_SUBST(DLLIB)
 
 AC_PROG_CXX
 
+AC_MSG_CHECKING(whether fPIC compiler option is accepted)
+SAVED_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -fPIC -Werror"
+AC_LANG_PUSH(C++)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return 0;])],
+    [AC_MSG_RESULT(yes)
+     CXXFLAGS="$SAVED_CXXFLAGS -fPIC"],
+    [AC_MSG_RESULT(no)
+     CXXFLAGS="$SAVED_CXXFLAGS"])
+AC_LANG_POP(C++)
+
 LT_INIT([disable-shared])
 
 AC_CONFIG_MACRO_DIR([m4])
