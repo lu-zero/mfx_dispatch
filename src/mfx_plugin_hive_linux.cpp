@@ -44,9 +44,9 @@ File Name: mfx_plugin_hive_linux.cpp
 #include <dlfcn.h>
 #include <sys/stat.h>
 
-#define TRACE_HIVE_ERROR(str, ...) DISPATCHER_LOG_ERROR((("[HIVE]: "str), __VA_ARGS__))
-#define TRACE_HIVE_INFO(str, ...) DISPATCHER_LOG_INFO((("[HIVE]: "str), __VA_ARGS__))
-#define TRACE_HIVE_WRN(str, ...) DISPATCHER_LOG_WRN((("[HIVE]: "str), __VA_ARGS__))
+#define TRACE_HIVE_ERROR(str, ...) DISPATCHER_LOG_ERROR((("[HIVE]: " str), __VA_ARGS__))
+#define TRACE_HIVE_INFO(str, ...) DISPATCHER_LOG_INFO((("[HIVE]: " str), __VA_ARGS__))
+#define TRACE_HIVE_WRN(str, ...) DISPATCHER_LOG_WRN((("[HIVE]: " str), __VA_ARGS__))
 
 namespace
 {
@@ -105,7 +105,7 @@ static bool CheckPluginRecord(PluginDescriptionRecord & descriptionRecord, mfxU3
 
     if (isFieldMissed(foundFields, requiredFields, PluginConfigParser::PARSED_CODEC_ID))
     {
-        TRACE_HIVE_INFO(alignStr()" : "MFXFOURCCTYPE()" \n", CodecIDKeyName, MFXU32TOFOURCC(descriptionRecord.CodecId));
+        TRACE_HIVE_INFO(alignStr()" : " MFXFOURCCTYPE() " \n", CodecIDKeyName, MFXU32TOFOURCC(descriptionRecord.CodecId));
     }
     else
     {
@@ -116,7 +116,7 @@ static bool CheckPluginRecord(PluginDescriptionRecord & descriptionRecord, mfxU3
     {
         return false;
     }
-    TRACE_HIVE_INFO(alignStr()" : "MFXGUIDTYPE()"\n", GUIDKeyName, MFXGUIDTOHEX(&descriptionRecord.PluginUID));
+    TRACE_HIVE_INFO(alignStr()" : " MFXGUIDTYPE() "\n", GUIDKeyName, MFXGUIDTOHEX(&descriptionRecord.PluginUID));
 
     if (isFieldMissed(foundFields, requiredFields, PluginConfigParser::PARSED_PATH))
     {
