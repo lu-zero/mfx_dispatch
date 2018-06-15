@@ -28,7 +28,7 @@ File Name: mfx_library_iterator.cpp
 
 \* ****************************************************************************** */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #include "mfx_library_iterator.h"
 
@@ -471,5 +471,5 @@ bool MFXLibraryIterator::GetSubKeyName(msdk_disp_char *subKeyName, size_t length
     return m_bIsSubKeyValid;
 }
 } // namespace MFX
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 

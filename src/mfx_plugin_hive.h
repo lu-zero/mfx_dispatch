@@ -61,7 +61,7 @@ namespace MFX {
     {
         return !(lhs == rhs);
     }
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
     //warning C4351: new behavior: elements of array 'MFX::PluginDescriptionRecord::sName' will be default initialized
     #pragma warning (disable: 4351)
 #endif

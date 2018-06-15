@@ -32,13 +32,13 @@ File Name: mfx_dispatcher_log.h
 
 #include "mfx_dispatcher_log.h"
 #include "mfxstructures.h"
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #include <windows.h>
 #if defined(DISPATCHER_LOG_REGISTER_EVENT_PROVIDER)
 #include <evntprov.h>
 #include <winmeta.h>
 #endif
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #include <stdarg.h>
 #include <algorithm>
 #include <string>

@@ -31,14 +31,14 @@ File Name: mfx_dxva2_device.h
 #if !defined(__MFX_DXVA2_DEVICE_H)
 #define __MFX_DXVA2_DEVICE_H
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #include <windows.h>
 
 #if !defined( WIN_TRESHOLD_MOBILE )
 #define MFX_D3D9_ENABLED
 #endif // !defined( WIN_TRESHOLD_MOBILE )
 
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #include "mfx/mfxdefs.h"
 
@@ -88,10 +88,10 @@ protected:
     // Free DLL module
     void UnloadDLLModule(void);
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
     // Handle to the DLL library
     HMODULE m_hModule;
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
     // Number of adapters available
     mfxU32 m_numAdapters;
@@ -112,7 +112,7 @@ private:
 };
 
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #ifdef MFX_D3D9_ENABLED
 class D3D9Device : public DXDevice
@@ -167,7 +167,7 @@ protected:
     void *m_pDXGIAdapter1;
 
 };
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 class DXVA2Device
 {

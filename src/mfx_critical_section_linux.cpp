@@ -28,7 +28,7 @@ File Name: mfx_critical_section_linux.cpp
 
 \* ****************************************************************************** */
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)
 
 #include "mfx_critical_section.h"
 #include <sched.h>
@@ -88,4 +88,4 @@ void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
 
 } // namespace MFX
 
-#endif // #if !defined(_WIN32) && !defined(_WIN64)
+#endif // #if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)

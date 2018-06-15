@@ -30,7 +30,7 @@ File Name: mfx_critical_section.cpp
 
 #include "mfx_critical_section.h"
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #include <windows.h>
 // SDK re-declares the following functions with different call declarator.
@@ -85,4 +85,4 @@ void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
 
 } // namespace MFX
 
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)

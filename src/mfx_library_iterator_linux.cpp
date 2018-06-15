@@ -29,7 +29,7 @@ File Name: mfx_library_iterator_linux.cpp
 \* ****************************************************************************** */
 
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -393,4 +393,4 @@ bool MFXLibraryIterator::GetSubKeyName(msdk_disp_char *subKeyName, size_t length
 
 } // namespace MFX
 
-#endif // #if !defined(_WIN32) && !defined(_WIN64)
+#endif // #if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)

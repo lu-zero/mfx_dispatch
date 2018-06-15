@@ -28,13 +28,18 @@ File Name: mfx_plugin_hive.cpp
 
 \* ****************************************************************************** */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #include "mfx_plugin_hive.h"
 #include "mfx_library_iterator.h"
 #include "mfx_dispatcher.h"
 #include "mfx_dispatcher_log.h"
 #include "mfx_load_dll.h"
+
+#if defined(__CYGWIN__)
+#include <locale>
+#include <codecvt>
+#endif
 
 #define TRACE_HIVE_ERROR(str, ...) DISPATCHER_LOG_ERROR((("[HIVE]: " str), __VA_ARGS__))
 #define TRACE_HIVE_INFO(str, ...) DISPATCHER_LOG_INFO((("[HIVE]: " str), __VA_ARGS__))
@@ -56,7 +61,7 @@ namespace
 
 namespace
 {
-#ifdef _WIN64
+#if defined(_WIN64) || defined(__CYGWIN64__)
     const wchar_t pluginFileName[] = L"FileName64";
 #else
     const wchar_t pluginFileName[] = L"FileName32";
@@ -307,7 +312,12 @@ MFX::MFXPluginsInFS::MFXPluginsInFS( mfxVersion currentAPIVersion )
         msdk_disp_char_cpy_s(currentModuleName + executableDirLen + pluginDirNameLen + slashLen
             , MAX_PLUGIN_PATH - executableDirLen - pluginDirNameLen - slashLen, pluginCfgFileName);
 
+#ifdef __CYGWIN__
+        std::string cmn_str = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(std::wstring(currentModuleName));
+        FILE *pluginCfgFile = fopen(cmn_str.c_str(), "r");
+#else
         FILE *pluginCfgFile = _wfopen(currentModuleName, L"r");
+#endif
         if (!pluginCfgFile)
         {
             TRACE_HIVE_INFO("in directory \"%S\" no mandatory \"%S\"\n"
