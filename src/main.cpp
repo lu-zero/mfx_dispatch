@@ -718,7 +718,7 @@ mfxStatus DISPATCHER_EXPOSED_PREFIX(MFXVideoUSER_LoadByPath)(mfxSession session,
     PluginDescriptionRecord record;
     record.sName[0] = 0;
 
-#ifdef _WIN32
+#if defined(_WIN32) || defined(__CYGWIN__)
     msdk_disp_char wPath[MAX_PLUGIN_PATH];
     int res = ::MultiByteToWideChar(CP_UTF8, MB_ERR_INVALID_CHARS, path, len, wPath, MAX_PLUGIN_PATH);
     if (!res)

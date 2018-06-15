@@ -17,6 +17,12 @@ AS_CASE([${host_os}],
         AM_CONDITIONAL([WINDOWS], [true])
         DLLIB=""
     ],
+    [*cygwin*], [
+        AC_DEFINE([MFX_HAVE_WINDOWS])
+        AC_DEFINE([_MAX_PATH], [MAX_PATH])
+        AM_CONDITIONAL([WINDOWS], [true])
+        DLLIB=""
+    ],
     [AC_MSG_ERROR([${host_os} not supported.])]
 )
 

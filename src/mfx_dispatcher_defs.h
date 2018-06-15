@@ -37,7 +37,7 @@ File Name: mfx_dispatcher_defs.h
 #include <string.h>
 #endif
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 typedef wchar_t  msdk_disp_char;
 #define MSDK2WIDE(x) x
 

@@ -28,7 +28,7 @@ File Name: mfx_load_dll_linux.cpp
 
 \* ****************************************************************************** */
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)
 
 #include "mfx_dispatcher.h"
 #include <dlfcn.h>
@@ -194,4 +194,4 @@ mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName) {
 
 } // namespace MFX
 
-#endif // #if !defined(_WIN32) && !defined(_WIN64)
+#endif // #if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)

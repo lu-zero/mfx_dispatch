@@ -28,7 +28,7 @@ File Name: mfx_win_reg_key.cpp
 
 \* ****************************************************************************** */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)  || defined(__CYGWIN__)
 
 #include "mfx_win_reg_key.h"
 #include "mfx_dispatcher_log.h"
@@ -225,4 +225,4 @@ bool WinRegKey::QueryInfo(LPDWORD lpcSubkeys)
 
 } // namespace MFX
 
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)

@@ -28,7 +28,7 @@ File Name: mfx_plugin_hive_linux.cpp
 
 \* ****************************************************************************** */
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)
 
 #include "mfx_plugin_hive.h"
 #include "mfx_library_iterator.h"

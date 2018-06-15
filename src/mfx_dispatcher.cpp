@@ -33,7 +33,7 @@ File Name: mfx_dispatcher.cpp
 #include "mfx_load_dll.h"
 
 #include <string.h>
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
     #include <windows.h>
     #pragma warning(disable:4355)
 #else
@@ -41,7 +41,7 @@ File Name: mfx_dispatcher.cpp
 #include <dlfcn.h>
 #include <iostream>
 
-#endif // defined(_WIN32) || defined(_WIN64)
+#endif // defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion) :
     apiVersion(requiredVersion),
@@ -227,7 +227,7 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         }
         else
         {
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
             DISPATCHER_LOG_WRN((("can't find DLL: GetLastErr()=0x%x\n"), GetLastError()))
 #else
             DISPATCHER_LOG_WRN((("can't find DLL: dlerror() = \"%s\"\n"), dlerror()));
