@@ -31,7 +31,7 @@ File Name: mfx_critical_section.h
 #if !defined(__MFX_CRITICAL_SECTION_H)
 #define __MFX_CRITICAL_SECTION_H
 
-#include "mfx/mfxdefs.h"
+#include <mfx/mfxdefs.h>
 
 namespace MFX
 {

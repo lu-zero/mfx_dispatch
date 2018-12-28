@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012-2014 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2018 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -32,8 +32,12 @@ File Name: mfx_library_iterator.h
 #define __MFX_LIBRARY_ITERATOR_H
 
 
-#include "mfx/mfxvideo.h"
+#include <mfx/mfxvideo.h>
+
+#if !defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE)
 #include "mfx_win_reg_key.h"
+#endif
+
 #include "mfx_dispatcher.h"
 
 #if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)
@@ -71,15 +75,21 @@ enum
     MFX_CURRENT_USER_KEY        = 0,
     MFX_LOCAL_MACHINE_KEY       = 1,
     MFX_APP_FOLDER              = 2,
-
+#if defined(MEDIASDK_USE_REGISTRY) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
+    MFX_PATH_MSDK_FOLDER = 3,
     MFX_STORAGE_ID_FIRST    = MFX_CURRENT_USER_KEY,
-    MFX_STORAGE_ID_LAST     = MFX_LOCAL_MACHINE_KEY
+    MFX_STORAGE_ID_LAST     = MFX_PATH_MSDK_FOLDER
+#else
+    MFX_PATH_MSDK_FOLDER = 3,
+    MFX_STORAGE_ID_FIRST = MFX_PATH_MSDK_FOLDER,
+    MFX_STORAGE_ID_LAST = MFX_PATH_MSDK_FOLDER
+#endif // !defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE)
 };
 #else
 enum
 {
     MFX_UNKNOWN_KEY     = -1,
-    MFX_STORAGE_ID_OPT  = 0, // storage is: /opt/intel
+    MFX_STORAGE_ID_OPT  = 0, // storage is: MFX_MODULES_DIR
     MFX_APP_FOLDER      = 1,
 
     MFX_STORAGE_ID_FIRST   =  MFX_STORAGE_ID_OPT,
@@ -90,6 +100,8 @@ enum
 // Try to initialize using given implementation type. Select appropriate type automatically in case of MFX_IMPL_VIA_ANY.
 // Params: adapterNum - in, pImplInterface - in/out, pVendorID - out, pDeviceID - out
 mfxStatus SelectImplementationType(const mfxU32 adapterNum, mfxIMPL *pImplInterface, mfxU32 *pVendorID, mfxU32 *pDeviceID);
+
+const mfxU32 msdk_disp_path_len = 1024;
 
 class MFXLibraryIterator
 {
@@ -134,7 +146,10 @@ protected:
     int    m_StorageID;
 
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+
+#if defined(MEDIASDK_USE_REGISTRY) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
     WinRegKey m_baseRegKey;                                     // (WinRegKey) main registry key
+#endif
 
     mfxU32 m_lastLibIndex;                                      // (mfxU32) index of previously returned library
     mfxU32 m_lastLibMerit;                                      // (mfxU32) merit of previously returned library
@@ -148,7 +163,7 @@ protected:
     struct mfx_libs*          m_libs;
 #endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
-    msdk_disp_char  m_path[260];
+    msdk_disp_char  m_path[msdk_disp_path_len];
 
 private:
     // unimplemented by intent to make this class non-copyable
