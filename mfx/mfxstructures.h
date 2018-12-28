@@ -1,22 +1,32 @@
-// Copyright (c) 2018 Intel Corporation
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
-//
-// The above copyright notice and this permission notice shall be included in all
-// copies or substantial portions of the Software.
-//
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-// SOFTWARE.
+/******************************************************************************* *\
+
+Copyright (C) 2007-2018 Intel Corporation.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+- Redistributions of source code must retain the above copyright notice,
+this list of conditions and the following disclaimer.
+- Redistributions in binary form must reproduce the above copyright notice,
+this list of conditions and the following disclaimer in the documentation
+and/or other materials provided with the distribution.
+- Neither the name of Intel Corporation nor the names of its contributors
+may be used to endorse or promote products derived from this software
+without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY INTEL CORPORATION "AS IS" AND ANY EXPRESS OR
+IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+IN NO EVENT SHALL INTEL CORPORATION BE LIABLE FOR ANY DIRECT, INDIRECT,
+INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+File Name: mfxstructures.h
+
+*******************************************************************************/
 #ifndef __MFXSTRUCTURES_H__
 #define __MFXSTRUCTURES_H__
 #include "mfxcommon.h"
@@ -92,9 +102,6 @@ enum {
     MFX_FOURCC_YV12         = MFX_MAKEFOURCC('Y','V','1','2'),
     MFX_FOURCC_NV16         = MFX_MAKEFOURCC('N','V','1','6'),
     MFX_FOURCC_YUY2         = MFX_MAKEFOURCC('Y','U','Y','2'),
-#if (MFX_VERSION >= MFX_VERSION_NEXT)
-    MFX_FOURCC_RGB565       = MFX_MAKEFOURCC('R','G','B','2'),
-#endif
     MFX_FOURCC_RGB3         = MFX_MAKEFOURCC('R','G','B','3'),   /* deprecated */
     MFX_FOURCC_RGB4         = MFX_MAKEFOURCC('R','G','B','4'),   /* ARGB in that order, A channel is 8 MSBs */
     MFX_FOURCC_P8           = 41,                                /*  D3DFMT_P8   */
@@ -109,6 +116,8 @@ enum {
     MFX_FOURCC_AYUV         = MFX_MAKEFOURCC('A','Y','U','V'),   /* YUV 4:4:4, AYUV in that order, A channel is 8 MSBs */
     MFX_FOURCC_AYUV_RGB4    = MFX_MAKEFOURCC('A','V','U','Y'),   /* ARGB in that order, A channel is 8 MSBs stored in AYUV surface*/
     MFX_FOURCC_UYVY         = MFX_MAKEFOURCC('U','Y','V','Y'),
+    MFX_FOURCC_Y210         = MFX_MAKEFOURCC('Y','2','1','0'),
+    MFX_FOURCC_Y410         = MFX_MAKEFOURCC('Y','4','1','0'),
 };
 
 /* PicStruct */
@@ -165,6 +174,15 @@ enum {
     MFX_CORRUPTION_REFERENCE_LIST  = 0x0020
 };
 
+#pragma pack(push, 4)
+typedef struct
+{
+    mfxU32 U : 10;
+    mfxU32 Y : 10;
+    mfxU32 V : 10;
+    mfxU32 A :  2;
+} mfxY410;
+#pragma pack(pop)
 
 #pragma pack(push, 4)
 typedef struct
@@ -212,6 +230,7 @@ typedef struct {
         mfxU8   *U;
         mfxU16  *U16;
         mfxU8   *G;
+        mfxY410 *Y410;          /* for Y410 format (merged AVYU) */
     };
     union {
         mfxU8   *Cr;
@@ -690,7 +709,11 @@ typedef struct {
     mfxU16      NumRefActiveBL0[8];
     mfxU16      NumRefActiveBL1[8];
 
-    mfxU16      reserved4[5];
+    mfxU16      reserved6;
+    mfxU16      TransformSkip;  /* tri-state option; HEVC transform_skip_enabled_flag */
+    mfxU16      TargetChromaFormatPlus1;   /* Minus 1 specifies target encoding chroma format (see ColorFormat enum). May differ from input one. */
+    mfxU16      TargetBitDepthLuma;        /* Target encoding bit depth for luma samples. May differ from input one. */
+    mfxU16      TargetBitDepthChroma;      /* Target encoding bit depth for chroma samples. May differ from input one. */
     mfxU16      BRCPanicMode;              /* tri-state option */
 
     mfxU16      LowDelayBRC;               /* tri-state option */
@@ -698,26 +721,11 @@ typedef struct {
     mfxU16      AdaptiveMaxFrameSize;      /* tri-state option */
 
     mfxU16      RepartitionCheckEnable;    /* tri-state option */
-#if (MFX_VERSION >= MFX_VERSION_NEXT)
-    mfxU16      QuantScaleType;            /* For MPEG2 specifies mapping between quantiser_scale_code and quantiser_scale (see QuantScaleType enum) */
-    mfxU16      IntraVLCFormat;            /* For MPEG2 specifies which table shall be used for coding of DCT coefficients of intra macroblocks (see IntraVLCFormat enum) */
-    mfxU16      ScanType;                  /* For MPEG2 specifies transform coefficients scan pattern (see ScanType enum) */
+    mfxU16      reserved5[3];
     mfxU16      EncodedUnitsInfo;          /* tri-state option */
     mfxU16      EnableNalUnitType;         /* tri-state option */
     mfxU16      ExtBrcAdaptiveLTR;         /* tri-state option for ExtBRC */
-
     mfxU16      reserved[163];
-#elif (MFX_VERSION >= 1025)
-    mfxU16      reserved5[3];
-
-    mfxU16      EncodedUnitsInfo;          /* tri-state option */
-    mfxU16      EnableNalUnitType;         /* tri-state option */
-
-    mfxU16      reserved[164];
-#else
-
-    mfxU16      reserved[169];
-#endif
 } mfxExtCodingOption3;
 
 /* IntraPredBlockSize/InterPredBlockSize */
@@ -809,6 +817,11 @@ enum {
     MFX_EXTBUFF_MULTI_FRAME_PARAM               = MFX_MAKEFOURCC('M', 'F', 'R', 'P'),
     MFX_EXTBUFF_MULTI_FRAME_CONTROL             = MFX_MAKEFOURCC('M', 'F', 'R', 'C'),
     MFX_EXTBUFF_ENCODED_UNITS_INFO              = MFX_MAKEFOURCC('E', 'N', 'U', 'I'),
+    MFX_EXTBUFF_VPP_MCTF                        = MFX_MAKEFOURCC('M', 'C', 'T', 'F'),
+    MFX_EXTBUFF_VP9_SEGMENTATION                = MFX_MAKEFOURCC('9', 'S', 'E', 'G'),
+    MFX_EXTBUFF_VP9_TEMPORAL_LAYERS             = MFX_MAKEFOURCC('9', 'T', 'M', 'L'),
+    MFX_EXTBUFF_VP9_PARAM                       = MFX_MAKEFOURCC('9', 'P', 'A', 'R'),
+    MFX_EXTBUFF_AVC_ROUNDING_OFFSET             = MFX_MAKEFOURCC('R','N','D','O'),
 };
 
 /* VPP Conf: Do not use certain algorithms  */
@@ -1482,6 +1495,15 @@ enum {
 };
 
 
+/* SampleAdaptiveOffset */
+enum {
+    MFX_SAO_UNKNOWN       = 0x00,
+    MFX_SAO_DISABLE       = 0x01,
+    MFX_SAO_ENABLE_LUMA   = 0x02,
+    MFX_SAO_ENABLE_CHROMA = 0x04
+};
+
+
 #pragma pack(push, 4)
 typedef struct {
     mfxExtBuffer    Header;
@@ -1489,7 +1511,9 @@ typedef struct {
     mfxU16          PicWidthInLumaSamples;
     mfxU16          PicHeightInLumaSamples;
     mfxU64          GeneralConstraintFlags;
-    mfxU16          reserved[118];
+    mfxU16          SampleAdaptiveOffset;   /* see enum SampleAdaptiveOffset, valid during Init and Runtime */
+    mfxU16          LCUSize;
+    mfxU16          reserved[116];
 } mfxExtHEVCParam;
 #pragma pack(pop)
 
@@ -1558,6 +1582,17 @@ typedef struct {
     mfxI16       Weights[2][32][3][2];      // [list][list entry][Y, Cb, Cr][weight, offset]
     mfxU16       reserved[58];
 } mfxExtPredWeightTable;
+
+typedef struct {
+    mfxExtBuffer Header;
+
+    mfxU16       EnableRoundingIntra;       // tri-state option
+    mfxU16       RoundingOffsetIntra;       // valid value [0,7]
+    mfxU16       EnableRoundingInter;       // tri-state option
+    mfxU16       RoundingOffsetInter;       // valid value [0,7]
+
+    mfxU16       reserved[24];
+} mfxExtAVCRoundingOffset;
 
 
 typedef struct {
@@ -1695,6 +1730,79 @@ typedef struct {
 } mfxExtColorConversion;
 
 
+/* VP9ReferenceFrame */
+enum {
+    MFX_VP9_REF_INTRA   = 0,
+    MFX_VP9_REF_LAST    = 1,
+    MFX_VP9_REF_GOLDEN  = 2,
+    MFX_VP9_REF_ALTREF  = 3
+};
+
+/* SegmentIdBlockSize */
+enum {
+    MFX_VP9_SEGMENT_ID_BLOCK_SIZE_UNKNOWN =  0,
+    MFX_VP9_SEGMENT_ID_BLOCK_SIZE_8x8     =  8,
+    MFX_VP9_SEGMENT_ID_BLOCK_SIZE_16x16   = 16,
+    MFX_VP9_SEGMENT_ID_BLOCK_SIZE_32x32   = 32,
+    MFX_VP9_SEGMENT_ID_BLOCK_SIZE_64x64   = 64,
+};
+
+/* SegmentFeature */
+enum {
+    MFX_VP9_SEGMENT_FEATURE_QINDEX      = 0x0001,
+    MFX_VP9_SEGMENT_FEATURE_LOOP_FILTER = 0x0002,
+    MFX_VP9_SEGMENT_FEATURE_REFERENCE   = 0x0004,
+    MFX_VP9_SEGMENT_FEATURE_SKIP        = 0x0008 /* (0,0) MV, no residual */
+};
+
+typedef struct {
+    mfxU16  FeatureEnabled;         /* see enum SegmentFeature */
+    mfxI16  QIndexDelta;
+    mfxI16  LoopFilterLevelDelta;
+    mfxU16  ReferenceFrame;        /* see enum VP9ReferenceFrame */
+    mfxU16  reserved[12];
+} mfxVP9SegmentParam;
+
+typedef struct {
+    mfxExtBuffer        Header;
+    mfxU16              NumSegments;            /* 0..8 */
+    mfxVP9SegmentParam  Segment[8];
+    mfxU16              SegmentIdBlockSize;     /* see enum SegmentIdBlockSize */
+    mfxU32              NumSegmentIdAlloc;      /* >= (Ceil(Width / SegmentIdBlockSize) * Ceil(Height / SegmentIdBlockSize)) */
+    union {
+        mfxU8           *SegmentId;             /*[NumSegmentIdAlloc] = 0..7, index in Segment array, blocks of SegmentIdBlockSize map */
+        mfxU64          reserved1;
+    };
+    mfxU16  reserved[52];
+} mfxExtVP9Segmentation;
+
+typedef struct {
+    mfxU16 FrameRateScale;  /* Layer[n].FrameRateScale = Layer[n - 1].FrameRateScale * (uint)m */
+    mfxU16 TargetKbps;      /* affected by BRCParamMultiplier, Layer[n].TargetKbps > Layer[n - 1].TargetKbps */
+    mfxU16 reserved[14];
+} mfxVP9TemporalLayer;
+
+typedef struct {
+    mfxExtBuffer        Header;
+    mfxVP9TemporalLayer Layer[8];
+    mfxU16              reserved[60];
+} mfxExtVP9TemporalLayers;
+
+typedef struct {
+    mfxExtBuffer Header;
+
+    mfxU16  FrameWidth;
+    mfxU16  FrameHeight;
+
+    mfxU16  WriteIVFHeaders;        /* tri-state option */
+
+    mfxI16  reserved1[6];
+    mfxI16  QIndexDeltaLumaDC;
+    mfxI16  QIndexDeltaChromaAC;
+    mfxI16  QIndexDeltaChromaDC;
+    mfxU16  reserved[112];
+} mfxExtVP9Param;
+
 
 /* Multi-Frame Mode */
 enum {
@@ -1744,6 +1852,15 @@ typedef struct {
 
     mfxU16 reserved[22];
 } mfxExtEncodedUnitsInfo;
+
+
+
+/* MCTF initialization & runtime */
+typedef struct {
+    mfxExtBuffer Header;
+    mfxU16       FilterStrength;
+    mfxU16       reserved[27];
+} mfxExtVppMctf;
 
 
 #ifdef __cplusplus

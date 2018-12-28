@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2012-2015 Intel Corporation.  All rights reserved.
+Copyright (C) 2012-2018 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -32,20 +32,22 @@ File Name: mfx_dispatcher.cpp
 #include "mfx_dispatcher_log.h"
 #include "mfx_load_dll.h"
 
+#include <assert.h>
+
 #include <string.h>
 #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
     #include <windows.h>
     #pragma warning(disable:4355)
 #else
-
-#include <dlfcn.h>
-#include <iostream>
-
+    #include <dlfcn.h>
+    #include <iostream>
 #endif // defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
+
 MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion) :
-    apiVersion(requiredVersion),
-    pluginFactory((mfxSession)this)
+    _mfxSession()
+    ,apiVersion(requiredVersion)
+    ,pluginFactory((mfxSession)this)
 {
     actualApiVersion.Version = 0;
     implType = MFX_LIB_SOFTWARE;
@@ -53,18 +55,10 @@ MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion) :
     loadStatus = MFX_ERR_NOT_FOUND;
     dispVersion.Major = MFX_DISPATCHER_VERSION_MAJOR;
     dispVersion.Minor = MFX_DISPATCHER_VERSION_MINOR;
-    session = (mfxSession) 0;
+    storageID = 0;
+    implInterface = MFX_IMPL_HARDWARE_ANY;
 
     hModule = (mfxModuleHandle) 0;
-
-    memset(callTable, 0, sizeof(callTable));
-    memset(callAudioTable, 0, sizeof(callAudioTable));
-
-#ifdef MFX_HAVE_LINUX
-    internal_hwctx = NULL;
-    tried_internal_hwctx = 0;;
-    got_user_hwctx = 0;
-#endif
 
 } // MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion)
 
@@ -88,12 +82,8 @@ mfxStatus MFX_DISP_HANDLE::Close(void)
         loadStatus = MFX_ERR_NOT_FOUND;
         dispVersion.Major = MFX_DISPATCHER_VERSION_MAJOR;
         dispVersion.Minor = MFX_DISPATCHER_VERSION_MINOR;
-        session = (mfxSession) 0;
-
+        *static_cast<_mfxSession*>(this) = _mfxSession();
         hModule = (mfxModuleHandle) 0;
-
-        memset(callTable, 0, sizeof(callTable));
-        memset(callAudioTable, 0, sizeof(callAudioTable));
     }
 
     return mfxRes;
@@ -150,7 +140,9 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
     this->implInterface = reqImplInterface;
 
     {
+        assert(hModule == (mfxModuleHandle)0);
         DISPATCHER_LOG_BLOCK(("invoking LoadLibrary(%S)\n", MSDK2WIDE(pPath)));
+
         // load the DLL into the memory
         hModule = MFX::mfx_dll_load(pPath);
 
@@ -284,7 +276,7 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         }
         else
         {
-            mfxRes = DISPATCHER_EXPOSED_PREFIX(MFXQueryVersion)((mfxSession) this, &actualApiVersion);
+            mfxRes = MFXQueryVersion((mfxSession) this, &actualApiVersion);
 
             if (MFX_ERR_NONE != mfxRes)
             {

@@ -1,6 +1,6 @@
 /* ****************************************************************************** *\
 
-Copyright (C) 2013-2014 Intel Corporation.  All rights reserved.
+Copyright (C) 2013-2018 Intel Corporation.  All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
@@ -87,6 +87,7 @@ namespace
 MFX::MFXPluginsInHive::MFXPluginsInHive(int mfxStorageID, const msdk_disp_char *msdkLibSubKey, mfxVersion currentAPIVersion)
     : MFXPluginStorageBase(currentAPIVersion)
 {
+#if defined(MEDIASDK_USE_REGISTRY) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
     HKEY rootHKey;
     bool bRes;
     WinRegKey regKey;
@@ -168,7 +169,7 @@ MFX::MFXPluginsInHive::MFXPluginsInHive(int mfxStorageID, const msdk_disp_char *
 
         if (QueryKey(subKey, CodecIDKeyName, descriptionRecord.CodecId))
         {
-            TRACE_HIVE_INFO(alignStr()" : " MFXFOURCCTYPE() " \n", CodecIDKeyName, MFXU32TOFOURCC(descriptionRecord.CodecId));
+            TRACE_HIVE_INFO(alignStr()" : "MFXFOURCCTYPE()" \n", CodecIDKeyName, MFXU32TOFOURCC(descriptionRecord.CodecId));
         }
         else
         {
@@ -179,7 +180,7 @@ MFX::MFXPluginsInHive::MFXPluginsInHive(int mfxStorageID, const msdk_disp_char *
         {
             continue;
         }
-        TRACE_HIVE_INFO(alignStr()" : " MFXGUIDTYPE() "\n", GUIDKeyName, MFXGUIDTOHEX(&descriptionRecord.PluginUID));
+        TRACE_HIVE_INFO(alignStr()" : "MFXGUIDTYPE()"\n", GUIDKeyName, MFXGUIDTOHEX(&descriptionRecord.PluginUID));
 
         mfxU32 nSize = sizeof(descriptionRecord.sPath)/sizeof(*descriptionRecord.sPath);
         if (!subKey.Query(PathKeyName, descriptionRecord.sPath, nSize))
@@ -227,8 +228,16 @@ MFX::MFXPluginsInHive::MFXPluginsInHive(int mfxStorageID, const msdk_disp_char *
             TRACE_HIVE_ERROR("operator[](%d) = descriptionRecord; - threw exception \n", index);
         }
     }
+#else
+
+    (void)mfxStorageID;
+    (void)msdkLibSubKey;
+    (void)currentAPIVersion;
+
+#endif //#if defined(MEDIASDK_USE_REGISTRY) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
 }
 
+#if defined(MEDIASDK_USE_CFGFILES) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
 MFX::MFXPluginsInFS::MFXPluginsInFS( mfxVersion currentAPIVersion )
     : MFXPluginStorageBase(currentAPIVersion)
     , mIsVersionParsed()
@@ -281,7 +290,7 @@ MFX::MFXPluginsInFS::MFXPluginsInFS( mfxVersion currentAPIVersion )
         for(i = 0; i != pluginDirNameLen / charsPermfxU8; i++)
         {
             mfxU32 hexNum = 0;
-            if (1 != swscanf(find_data.cFileName + charsPermfxU8 * i, L"%2x", &hexNum))
+            if (1 != swscanf_s(find_data.cFileName + charsPermfxU8 * i, L"%2x", &hexNum))
             {
                 // it is ok to have non-plugin subdirs with length 32
                 //TRACE_HIVE_INFO("folder name \"%S\" is not a valid GUID string\n", find_data.cFileName);
@@ -312,11 +321,12 @@ MFX::MFXPluginsInFS::MFXPluginsInFS( mfxVersion currentAPIVersion )
         msdk_disp_char_cpy_s(currentModuleName + executableDirLen + pluginDirNameLen + slashLen
             , MAX_PLUGIN_PATH - executableDirLen - pluginDirNameLen - slashLen, pluginCfgFileName);
 
+        FILE *pluginCfgFile = 0;
 #ifdef __CYGWIN__
         std::string cmn_str = std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(std::wstring(currentModuleName));
-        FILE *pluginCfgFile = fopen(cmn_str.c_str(), "r");
+        pluginCfgFile = fopen(cmn_str.c_str(), "r");
 #else
-        FILE *pluginCfgFile = _wfopen(currentModuleName, L"r");
+        _wfopen_s(&pluginCfgFile, currentModuleName, L"r");
 #endif
         if (!pluginCfgFile)
         {
@@ -341,7 +351,7 @@ MFX::MFXPluginsInFS::MFXPluginsInFS( mfxVersion currentAPIVersion )
     FindClose(fileFirst);
 }
 
-bool MFX::MFXPluginsInFS::ParseFile(FILE * f, PluginDescriptionRecord & descriptionRecord)
+bool MFX::MFXPluginsInFS::ParseFile(FILE * f, PluginDescriptionRecord & descriptionRecord) 
 {
     msdk_disp_char line[MAX_PLUGIN_FILE_LINE];
 
@@ -386,7 +396,7 @@ bool MFX::MFXPluginsInFS::ParseKVPair( msdk_disp_char * key, msdk_disp_char* val
     if (0 != wcsstr(key, PlgVerKeyName))
     {
         mfxU32 version ;
-        if (0 == swscanf(value, L"%d", &version))
+        if (0 == swscanf_s(value, L"%d", &version))
         {
             return false;
         }
@@ -406,7 +416,7 @@ bool MFX::MFXPluginsInFS::ParseKVPair( msdk_disp_char * key, msdk_disp_char* val
     if (0 != wcsstr(key, APIVerKeyName))
     {
         mfxU32 APIversion;
-        if (0 == swscanf(value, L"%d", &APIversion))
+        if (0 == swscanf_s(value, L"%d", &APIversion))
         {
             return false;
         }
@@ -462,6 +472,7 @@ bool MFX::MFXPluginsInFS::ParseKVPair( msdk_disp_char * key, msdk_disp_char* val
 
     return true;
 }
+#endif //#if defined(MEDIASDK_USE_CFGFILES) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
 
 MFX::MFXDefaultPlugins::MFXDefaultPlugins(mfxVersion currentAPIVersion, MFX_DISP_HANDLE * hdl, int implType)
     : MFXPluginStorageBase(currentAPIVersion)
