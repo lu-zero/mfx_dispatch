@@ -28,12 +28,12 @@ File Name: mfx_win_reg_key.cpp
 
 \* ****************************************************************************** */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)  || defined(__CYGWIN__)
 
 #include "mfx_win_reg_key.h"
 #include "mfx_dispatcher_log.h"
 
-#define TRACE_WINREG_ERROR(str, ...) DISPATCHER_LOG_ERROR((("[WINREG]: "str), __VA_ARGS__))
+#define TRACE_WINREG_ERROR(str, ...) DISPATCHER_LOG_ERROR((("[WINREG]: " str), __VA_ARGS__))
 
 namespace MFX
 {
@@ -225,4 +225,4 @@ bool WinRegKey::QueryInfo(LPDWORD lpcSubkeys)
 
 } // namespace MFX
 
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)

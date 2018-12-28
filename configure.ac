@@ -17,6 +17,12 @@ AS_CASE([${host_os}],
         AM_CONDITIONAL([WINDOWS], [true])
         DLLIB=""
     ],
+    [*cygwin*], [
+        AC_DEFINE([MFX_HAVE_WINDOWS])
+        AC_DEFINE([_MAX_PATH], [MAX_PATH])
+        AM_CONDITIONAL([WINDOWS], [true])
+        DLLIB=""
+    ],
     [AC_MSG_ERROR([${host_os} not supported.])]
 )
 
@@ -33,6 +39,17 @@ AC_SUBST(MFX_LT_REVISION)
 AC_SUBST(DLLIB)
 
 AC_PROG_CXX
+
+AC_MSG_CHECKING(whether fPIC compiler option is accepted)
+SAVED_CXXFLAGS="$CXXFLAGS"
+CXXFLAGS="$CXXFLAGS -fPIC -Werror"
+AC_LANG_PUSH(C++)
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([], [return 0;])],
+    [AC_MSG_RESULT(yes)
+     CXXFLAGS="$SAVED_CXXFLAGS -fPIC"],
+    [AC_MSG_RESULT(no)
+     CXXFLAGS="$SAVED_CXXFLAGS"])
+AC_LANG_POP(C++)
 
 LT_INIT([disable-shared])
 

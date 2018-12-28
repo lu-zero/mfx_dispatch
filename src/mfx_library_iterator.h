@@ -36,7 +36,7 @@ File Name: mfx_library_iterator.h
 #include "mfx_win_reg_key.h"
 #include "mfx_dispatcher.h"
 
-#if !defined(_WIN32) && !defined(_WIN64)
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(__CYGWIN__)
 struct mfx_disp_adapters
 {
     mfxU32 vendor_id;
@@ -64,7 +64,7 @@ namespace MFX
 {
 
 // declare desired storage ID
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 enum
 {
     MFX_UNKNOWN_KEY             = -1,
@@ -133,7 +133,7 @@ protected:
     wchar_t m_SubKeyName[MFX_MAX_REGISTRY_KEY_NAME];            // registry subkey for selected module loaded
     int    m_StorageID;
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
     WinRegKey m_baseRegKey;                                     // (WinRegKey) main registry key
 
     mfxU32 m_lastLibIndex;                                      // (mfxU32) index of previously returned library
@@ -146,7 +146,7 @@ protected:
     int                       m_selected_adapter;
     mfxU32                    m_libs_num;
     struct mfx_libs*          m_libs;
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
     msdk_disp_char  m_path[260];
 

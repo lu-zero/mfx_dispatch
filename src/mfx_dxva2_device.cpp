@@ -28,7 +28,7 @@ File Name: mfx_dxva2_device.cpp
 
 \* ****************************************************************************** */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #define INITGUID
 #include <d3d9.h>

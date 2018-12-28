@@ -28,7 +28,7 @@ File Name: mfx_load_dll.cpp
 
 \* ****************************************************************************** */
 
-#if defined(_WIN32) || defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #include "mfx_dispatcher.h"
 #include "mfx_load_dll.h"
@@ -39,7 +39,7 @@ File Name: mfx_load_dll.cpp
 
 #if !defined(_DEBUG)
 
-#if defined(_WIN64)
+#if defined(_WIN64) || defined(__CYGWIN64__)
 const
 wchar_t * const defaultDLLName[2] = {L"libmfxhw64.dll",
                                      L"libmfxsw64.dll"};
@@ -51,7 +51,7 @@ const
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin64_hw.dll",
                                             L"mfxplugin64_sw.dll"};
 
-#elif defined(_WIN32)
+#elif defined(_WIN32) || defined(__CYGWIN__)
 const
 wchar_t * const defaultDLLName[2] = {L"libmfxhw32.dll",
                                      L"libmfxsw32.dll"};
@@ -68,7 +68,7 @@ wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin32_hw.dll",
 
 #else // defined(_DEBUG)
 
-#if defined(_WIN64)
+#if defined(_WIN64) || defined(__CYGWIN64__)
 const
 wchar_t * const defaultDLLName[2] = {L"libmfxhw64_d.dll",
                                      L"libmfxsw64_d.dll"};
@@ -80,7 +80,7 @@ const
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin64_hw_d.dll",
                                             L"mfxplugin64_sw_d.dll"};
 
-#elif defined(WIN32)
+#elif defined(WIN32) || defined(__CYGWIN__)
 const
 wchar_t * const defaultDLLName[2] = {L"libmfxhw32_d.dll",
                                      L"libmfxsw32_d.dll"};
@@ -238,4 +238,4 @@ mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName)
 
 } // namespace MFX
 
-#endif // #if defined(_WIN32) || defined(_WIN64)
+#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
