@@ -36,6 +36,7 @@ File Name: mfx_load_dll.cpp
 #include <wchar.h>
 #include <string.h>
 #include <windows.h>
+#include <winapifamily.h>
 
 #if !defined(_DEBUG)
 
@@ -174,8 +175,11 @@ mfxModuleHandle mfx_dll_load(const msdk_disp_char *pFileName)
 #endif
 #endif // !defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE)
 
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+        // this should never be called with MEDIASDK_UWP_LOADER set
         // load the library's module
         hModule = LoadLibraryExW(pFileName, NULL, 0);
+#endif
 
 #if !defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE)
         // set the previous error mode
