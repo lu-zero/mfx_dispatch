@@ -46,6 +46,21 @@ libmfx_la_LDFLAGS += -version-info $(MFX_LT_CURRENT):$(MFX_LT_REVISION):$(MFX_LT
 libmfx_la_LIBADD = $(DLLIB) $(LIBVA_DRM_LIBS) $(LIBVA_X11_LIBS)
 libmfx_la_CPPFLAGS = $(LIBVA_DRM_CFLAGS) $(LIBVA_X11_CFLAGS) $(AM_CPPFLAGS)
 
+if WINDOWS_STORE
+libintel_gfx_api-x86.a: src/intel_gfx_api-x86.def
+	$(DLLTOOL) --as=as --output-lib $@ --input-def $< --as-flags=--32 -m i386 
+libintel_gfx_api-x64.a: src/intel_gfx_api-x64.def
+	$(DLLTOOL) --as=as --output-lib $@ --input-def $< --as-flags=--64 -m i386:x86-64
+
+if DLLTOOL_X86
+lib_LTLIBRARIES += libintel_gfx_api-x86.a
+endif
+if DLLTOOL_X64
+lib_LTLIBRARIES += libintel_gfx_api-x64.a
+endif
+endif
+
+
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libmfx.pc
 
