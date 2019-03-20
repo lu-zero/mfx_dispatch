@@ -1,0 +1,4 @@
+LIBRARY intel_gfx_api-x86.dll
+EXPORTS
+InitialiseMediaSession@12
+DisposeMediaSession@4
