@@ -33,6 +33,7 @@ File Name: mfx_dxva2_device.cpp
 #define INITGUID
 #include <d3d9.h>
 #include <dxgi.h>
+#include <winapifamily.h>
 
 #include "mfx_dxva2_device.h"
 
@@ -117,8 +118,12 @@ void DXDevice::LoadDLLModule(const wchar_t *pModuleName)
 #endif
 #endif // !defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE)
 
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
     // load specified library
     m_hModule = LoadLibraryExW(pModuleName, NULL, 0);
+#else
+    m_hModule = (HMODULE)(intptr_t) 0x1234; // fake value, we can't load system DLLs
+#endif
 
 #if !defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE)
     // set the previous error mode
@@ -135,7 +140,9 @@ void DXDevice::UnloadDLLModule(void)
 {
     if (m_hModule)
     {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
         FreeLibrary(m_hModule);
+#endif
         m_hModule = (HMODULE) 0;
     }
 
@@ -341,8 +348,12 @@ bool DXGI1Device::Init(const mfxU32 adapterNum)
         mfxU32 maxAdapters = 0;
         HRESULT hRes = E_FAIL;
 
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
         // load address of procedure to create DXGI 1.1 factory
         pFunc = (DXGICreateFactoryFunc) GetProcAddress(m_hModule, "CreateDXGIFactory1");
+#else
+        pFunc = CreateDXGIFactory1;
+#endif
 
         if (NULL == pFunc)
         {

@@ -29,9 +29,11 @@ AS_CASE([${host_os}],
 AS_CASE([${host_os}],
     [mingw32uwp], [
         AM_CONDITIONAL([WINDOWS_STORE], [true])
+        DLLIB="$(DLLIB) -ldxgi"
     ],
     [mingw32winrt], [
         AM_CONDITIONAL([WINDOWS_STORE], [true])
+        DLLIB="$(DLLIB) -ldxgi"
     ],
     [
         AM_CONDITIONAL([WINDOWS_STORE], [false])
