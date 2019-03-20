@@ -40,6 +40,7 @@ File Name: mfx_library_iterator.cpp
 
 #include <tchar.h>
 #include <windows.h>
+#include <winapifamily.h>
 
 #include <vector>
 
@@ -168,12 +169,17 @@ void MFXLibraryIterator::Release(void)
 
 DECLSPEC_NOINLINE HMODULE GetThisDllModuleHandle()
 {
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
   HMODULE hDll = HMODULE(-1);
 
   GetModuleHandleExW( GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS |
                       GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                       reinterpret_cast<LPCWSTR>(&GetThisDllModuleHandle), &hDll);
   return hDll;
+#else
+    // this should never be called with MEDIASDK_UWP_LOADER set
+    return NULL;
+#endif
 }
 
 // msdk_disp_char* sImplPath must be allocated with size not less then msdk_disp_path_len
