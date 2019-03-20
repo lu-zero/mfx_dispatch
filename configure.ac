@@ -26,6 +26,18 @@ AS_CASE([${host_os}],
     [AC_MSG_ERROR([${host_os} not supported.])]
 )
 
+AS_CASE([${host_os}],
+    [mingw32uwp], [
+        AM_CONDITIONAL([WINDOWS_STORE], [true])
+    ],
+    [mingw32winrt], [
+        AM_CONDITIONAL([WINDOWS_STORE], [true])
+    ],
+    [
+        AM_CONDITIONAL([WINDOWS_STORE], [false])
+    ]
+)
+
 PKG_HAVE_DEFINE_WITH_MODULES(LIBVA_DRM, [libva-drm])
 PKG_HAVE_DEFINE_WITH_MODULES(LIBVA_X11, [libva-x11])
 
