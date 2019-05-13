@@ -169,7 +169,7 @@ MFX::MFXPluginsInHive::MFXPluginsInHive(int mfxStorageID, const msdk_disp_char *
 
         if (QueryKey(subKey, CodecIDKeyName, descriptionRecord.CodecId))
         {
-            TRACE_HIVE_INFO(alignStr()" : "MFXFOURCCTYPE()" \n", CodecIDKeyName, MFXU32TOFOURCC(descriptionRecord.CodecId));
+            TRACE_HIVE_INFO(alignStr()" : " MFXFOURCCTYPE() " \n", CodecIDKeyName, MFXU32TOFOURCC(descriptionRecord.CodecId));
         }
         else
         {
@@ -180,7 +180,7 @@ MFX::MFXPluginsInHive::MFXPluginsInHive(int mfxStorageID, const msdk_disp_char *
         {
             continue;
         }
-        TRACE_HIVE_INFO(alignStr()" : "MFXGUIDTYPE()"\n", GUIDKeyName, MFXGUIDTOHEX(&descriptionRecord.PluginUID));
+        TRACE_HIVE_INFO(alignStr()" : " MFXGUIDTYPE() "\n", GUIDKeyName, MFXGUIDTOHEX(&descriptionRecord.PluginUID));
 
         mfxU32 nSize = sizeof(descriptionRecord.sPath)/sizeof(*descriptionRecord.sPath);
         if (!subKey.Query(PathKeyName, descriptionRecord.sPath, nSize))
