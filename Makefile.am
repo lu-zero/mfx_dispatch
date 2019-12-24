@@ -65,26 +65,33 @@ pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libmfx.pc
 
 pkginclude_HEADERS = \
-	mfx/mfxastructures.h		 \
-	mfx/mfxaudio.h			 \
-    mfx/mfxcamera.h                  \
-	mfx/mfxcommon.h                  \
-	mfx/mfxdefs.h                    \
-	mfx/mfxenc.h                     \
-	mfx/mfxjpeg.h                    \
-	mfx/mfxla.h                      \
-	mfx/mfxmvc.h                     \
-	mfx/mfxpak.h                     \
-	mfx/mfxplugin.h                  \
-    mfx/mfxsc.h                      \
-	mfx/mfxsession.h                 \
-	mfx/mfxstructures.h              \
-	mfx/mfxvideo.h			 \
-	mfx/mfxvp8.h                     \
-	mfx/mfxvp9.h                     \
-	mfx/mfxvstructures.h		 \
-	mfx/mfxbrc.h			 \
-	mfx/mfxfei.h			 \
+	mfx/mfxadapter.h					\
+	mfx/mfxastructures.h				\
+	mfx/mfxaudio.h						\
+	mfx/mfxaudio++.h					\
+	mfx/mfxcamera.h						\
+	mfx/mfxcommon.h						\
+	mfx/mfxdispatcherprefixedfunctions.h\
+	mfx/mfxdefs.h						\
+	mfx/mfxenc.h						\
+	mfx/mfxjpeg.h						\
+	mfx/mfxla.h							\
+	mfx/mfxmvc.h						\
+	mfx/mfxpak.h						\
+	mfx/mfxpcp.h						\
+	mfx/mfxplugin.h						\
+	mfx/mfxplugin++.h					\
+	mfx/mfxsc.h							\
+	mfx/mfxscd.h						\
+	mfx/mfxsession.h					\
+	mfx/mfxstructures.h					\
+	mfx/mfxvideo.h						\
+	mfx/mfxvideo++.h					\
+	mfx/mfxvp8.h						\
+	mfx/mfxvp9.h						\
+	mfx/mfxvstructures.h				\
+	mfx/mfxbrc.h						\
+	mfx/mfxfei.h						\
 	mfx/mfxfeihevc.h
 
 pkgincludedir = $(includedir)/mfx
