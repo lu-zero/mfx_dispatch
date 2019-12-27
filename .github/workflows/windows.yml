@@ -1,0 +1,59 @@
+name: mingw-w64 build
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      MSYSTEM: MINGW64
+      MSYS2_PATH_TYPE: inherit
+      CC: ccache gcc
+      CXX: ccache g++
+    steps:
+      - uses: actions/checkout@v2.0.0
+      - name: Get msys2
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -OutFile msys2.tar.xz -Uri "http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz"
+          7z x msys2.tar.xz
+          7z x -aoa -oC:/ msys2.tar
+          Remove-Item msys2.tar.xz, msys2.tar
+          Write-Output "::add-path::C:/msys64/usr/bin"
+          Write-Output "::add-path::C:/msys64/mingw64/bin"
+
+      - name: Cache ccache
+        id: cache-msys64
+        uses: 1480c1/cache@mabs
+        with:
+          path: C:\msys64\home\runneradmin\.ccache
+          key: ${{ runner.os }}-msys64
+      - name: Cache pacman packages
+        uses: 1480c1/cache@mabs
+        with:
+          path: C:\msys64\var\cache\pacman\pkg
+          key: ${{ runner.os }}-pacman
+
+      - name: First run
+        run: bash -lc 'exit'
+
+      - name: First update
+        run: pacman -Syyuu --needed --ask=20 --noconfirm
+
+      - name: Install packages
+        run: pacman -S --needed --ask=20 --noconfirm autoconf make automake-wrapper libtool mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc
+
+      - name: Run autoreconf
+        run: perl -S /usr/bin/autoreconf -fiv
+
+      - name: Run Configure
+        run: bash configure --prefix=/mingw64
+
+      - name: Run make
+        run: make -j4 install
+
+      - name: Print ccache info and clean pacman
+        run: |
+          bash -c 'ccache -s'
+          pacman -Sc --noconfirm
