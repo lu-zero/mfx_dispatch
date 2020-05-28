@@ -35,6 +35,20 @@ AS_CASE([${host_os}],
         AM_CONDITIONAL([WINDOWS_STORE], [true])
         DLLIB="$(DLLIB) -ldxgi"
     ],
+    [mingw32], [
+        AC_PREPROC_IFELSE([AC_LANG_PROGRAM(
+          [[#include <winapifamily.h>
+           #if WINAPI_FAMILY_PARTITION (WINAPI_PARTITION_DESKTOP)
+           # error Win32 Desktop build
+           #endif
+          ]],[[;]])
+        ],[
+            AM_CONDITIONAL([WINDOWS_STORE], [true])
+            DLLIB="$(DLLIB) -ldxgi"
+        ],[
+            AM_CONDITIONAL([WINDOWS_STORE], [false])
+        ])
+    ],
     [
         AM_CONDITIONAL([WINDOWS_STORE], [false])
     ]
