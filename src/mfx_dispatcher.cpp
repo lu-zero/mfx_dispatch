@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Intel Corporation
+// Copyright (c) 2012-2020 Intel Corporation
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -488,7 +488,7 @@ mfxStatus MFXQueryAdaptersDecode(mfxBitstream* bitstream, mfxU32 codec_id, mfxAd
         mfxStatus sts = InitDummySession(adapter_n - 1, dummy_session);
         if (sts != MFX_ERR_NONE)
         {
-            return sts;
+            continue;
         }
 
         mfxVideoParam stream_params, out;
@@ -498,12 +498,9 @@ mfxStatus MFXQueryAdaptersDecode(mfxBitstream* bitstream, mfxU32 codec_id, mfxAd
 
         sts = MFXVideoDECODE_DecodeHeader(dummy_session.operator mfxSession(), bitstream, &stream_params);
 
-        if (sts == MFX_ERR_UNSUPPORTED) // Unsupported CodecId, try another adapter
-            continue;
-
         if (sts != MFX_ERR_NONE)
         {
-            return sts;
+            continue;
         }
 
         sts = MFXVideoDECODE_Query(dummy_session.operator mfxSession(), &stream_params, &out);
@@ -513,14 +510,28 @@ mfxStatus MFXQueryAdaptersDecode(mfxBitstream* bitstream, mfxU32 codec_id, mfxAd
 
         mfxAdapterInfo info;
         memset(&info, 0, sizeof(info));
-        sts = MFXVideoCORE_QueryPlatform(dummy_session.operator mfxSession(), &info.Platform);
 
+        //WA for initialization when application built w/ new API, but lib w/ old one.
+        mfxVersion apiVersion;
+        sts = dummy_session.QueryVersion(&apiVersion);
         if (sts != MFX_ERR_NONE)
+            continue;
+
+        if (apiVersion.Major >= 1 && apiVersion.Minor >= 19)
         {
-            return sts;
+            sts = MFXVideoCORE_QueryPlatform(dummy_session.operator mfxSession(), &info.Platform);
+
+            if (sts != MFX_ERR_NONE)
+            {
+                continue;
+            }
+        }
+        else
+        {
+            // for API versions greater than 1.19 Device id is set inside QueryPlatform call
+            info.Platform.DeviceId = static_cast<mfxU16>(DeviceID);
         }
 
-        //info.Platform.DeviceId = DeviceID;
         info.Number = adapter_n - 1;
 
         obtained_info.push_back(info);
@@ -555,7 +566,7 @@ mfxStatus MFXQueryAdapters(mfxComponentInfo* input_info, mfxAdaptersInfo* adapte
         mfxStatus sts = InitDummySession(adapter_n - 1, dummy_session);
         if (sts != MFX_ERR_NONE)
         {
-            return sts;
+            continue;
         }
 
         // If input_info is NULL just return all Intel adapters and information about them
@@ -595,14 +606,28 @@ mfxStatus MFXQueryAdapters(mfxComponentInfo* input_info, mfxAdaptersInfo* adapte
 
         mfxAdapterInfo info;
         memset(&info, 0, sizeof(info));
-        sts = MFXVideoCORE_QueryPlatform(dummy_session.operator mfxSession(), &info.Platform);
 
+        //WA for initialization when application built w/ new API, but lib w/ old one.
+        mfxVersion apiVersion;
+        sts = dummy_session.QueryVersion(&apiVersion);
         if (sts != MFX_ERR_NONE)
+            continue;
+
+        if (apiVersion.Major >= 1 && apiVersion.Minor >= 19)
         {
-            return sts;
+            sts = MFXVideoCORE_QueryPlatform(dummy_session.operator mfxSession(), &info.Platform);
+
+            if (sts != MFX_ERR_NONE)
+            {
+                continue;
+            }
+        }
+        else
+        {
+            // for API versions greater than 1.19 Device id is set inside QueryPlatform call
+            info.Platform.DeviceId = static_cast<mfxU16>(DeviceID);
         }
 
-        //info.Platform.DeviceId = DeviceID;
         info.Number = adapter_n - 1;
 
         obtained_info.push_back(info);
