@@ -16,10 +16,6 @@ jobs:
       - name: Get msys2
         shell: pwsh
         run: |
-          Invoke-WebRequest -OutFile msys2.tar.xz -Uri "http://repo.msys2.org/distrib/msys2-x86_64-latest.tar.xz"
-          7z x msys2.tar.xz
-          7z x -aoa -oC:/ msys2.tar
-          Remove-Item msys2.tar.xz, msys2.tar
           Write-Output "::add-path::C:/msys64/usr/bin"
           Write-Output "::add-path::C:/msys64/mingw64/bin"
 
@@ -37,9 +33,6 @@ jobs:
 
       - name: First run
         run: bash -lc 'exit'
-
-      - name: First update
-        run: pacman -Syyuu --needed --ask=20 --noconfirm
 
       - name: Install packages
         run: pacman -S --needed --ask=20 --noconfirm autoconf make automake-wrapper libtool mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc
