@@ -13,41 +13,37 @@ jobs:
       CXX: ccache g++
     steps:
       - uses: actions/checkout@v2.0.0
-      - name: Get msys2
-        shell: pwsh
-        run: |
-          Write-Output "::add-path::C:/msys64/usr/bin"
-          Write-Output "::add-path::C:/msys64/mingw64/bin"
+      - name: Setup ccache dir
+        run: Write-Output "::set-env name=CCACHE_DIR::$PWD/.ccache"
 
       - name: Cache ccache
         id: cache-msys64
-        uses: 1480c1/cache@mabs
+        uses: actions/cache@v2
         with:
-          path: C:\msys64\home\runneradmin\.ccache
+          path: .ccache
           key: ${{ runner.os }}-msys64-${{ hashFiles('**/*.c') }}
           restore-keys: ${{ runner.os }}-msys64-
-      - name: Cache pacman packages
-        uses: 1480c1/cache@mabs
+
+      - uses: msys2/setup-msys2@v2
         with:
-          path: C:\msys64\var\cache\pacman\pkg
-          key: ${{ runner.os }}-pacman
-
-      - name: First run
-        run: bash -lc 'exit'
-
-      - name: Install packages
-        run: pacman -S --needed --ask=20 --noconfirm autoconf make automake-wrapper libtool mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc
+          msystem: MINGW64
+          install: autoconf make automake-wrapper libtool mingw-w64-x86_64-ccache mingw-w64-x86_64-gcc
+          update: true
 
       - name: Run autoreconf
-        run: perl -S /usr/bin/autoreconf -fiv
+        shell: msys2 {0}
+        run: autoreconf -fiv
 
       - name: Run Configure
-        run: bash configure --prefix=/mingw64
+        shell: msys2 {0}
+        run: ./configure --prefix=/mingw64
 
       - name: Run make
+        shell: msys2 {0}
         run: make -j4 install
 
       - name: Print ccache info and clean pacman
+        shell: msys2 {0}
         run: |
-          bash -c 'ccache -s'
+          ccache -s
           pacman -Sc --noconfirm
