@@ -24,7 +24,8 @@ jobs:
         uses: 1480c1/cache@mabs
         with:
           path: C:\msys64\home\runneradmin\.ccache
-          key: ${{ runner.os }}-msys64
+          key: ${{ runner.os }}-msys64-${{ hashFiles('**/*.c') }}
+          restore-keys: ${{ runner.os }}-msys64-
       - name: Cache pacman packages
         uses: 1480c1/cache@mabs
         with:
