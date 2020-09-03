@@ -34,7 +34,6 @@ else
 libmfx_la_SOURCES += \
     src/mfx_va_glue.c                  \
     src/mfx_critical_section_linux.cpp \
-    src/mfx_library_iterator_linux.cpp \
     src/mfx_load_dll_linux.cpp         \
     src/mfx_plugin_cfg_parser.cpp      \
     src/mfx_plugin_hive_linux.cpp
