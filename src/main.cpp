@@ -18,10 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#ifndef MFX_HAVE_LINUX
 #include <windows.h>
 #include <stringapiset.h>
-#endif
 
 #include <new>
 #include <memory>
