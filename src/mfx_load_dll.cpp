@@ -18,8 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-
 #include "mfx_dispatcher.h"
 #include "mfx_load_dll.h"
 
@@ -27,8 +25,7 @@
 #include <string.h>
 #include <windows.h>
 
-
-#if defined(_WIN64) || defined(__CYGWIN64__)
+#if defined(_WIN64)
 const
 wchar_t * const defaultDLLName[2] = {L"libmfxhw64.dll",
                                      L"libmfxsw64.dll"};
@@ -36,7 +33,7 @@ const
 wchar_t * const defaultAudioDLLName[2] = {L"libmfxaudiosw64.dll",
                                           L"libmfxaudiosw64.dll"};
 
-const
+const 
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin64_hw.dll",
                                             L"mfxplugin64_sw.dll"};
 
@@ -45,7 +42,7 @@ const
 wchar_t  * const IntelGFXAPIDLLName = {L"intel_gfx_api-x64.dll"};
 #endif
 
-#elif defined(_WIN32) || defined(__CYGWIN__)
+#elif defined(_WIN32)
 const
 wchar_t * const defaultDLLName[2] = {L"libmfxhw32.dll",
                                      L"libmfxsw32.dll"};
@@ -54,7 +51,7 @@ const
 wchar_t * const defaultAudioDLLName[2] = {L"libmfxaudiosw32.dll",
                                           L"libmfxaudiosw32.dll"};
 
-const
+const 
 wchar_t  * const defaultPluginDLLName[2] = {L"mfxplugin32_hw.dll",
                                             L"mfxplugin32_sw.dll"};
 
@@ -69,26 +66,26 @@ namespace MFX
 {
 
 
-mfxStatus mfx_get_default_dll_name(msdk_disp_char *pPath, size_t pathSize, eMfxImplType implType)
+mfxStatus mfx_get_default_dll_name(wchar_t *pPath, size_t pathSize, eMfxImplType implType)
 {
     if (!pPath)
     {
         return MFX_ERR_NULL_PTR;
     }
-
+    
 
     // there are only 2 implementation with default DLL names
 #if _MSC_VER >= 1400
     return 0 == wcscpy_s(pPath, pathSize, defaultDLLName[implType & 1])
         ? MFX_ERR_NONE : MFX_ERR_UNKNOWN;
-#else
+#else    
     wcscpy(pPath, defaultDLLName[implType & 1]);
     return MFX_ERR_NONE;
 #endif
-} // mfxStatus mfx_get_default_dll_name(msdk_disp_char *pPath, size_t pathSize, eMfxImplType implType)
+} // mfxStatus mfx_get_default_dll_name(wchar_t *pPath, size_t pathSize, eMfxImplType implType)
 
 #if defined(MEDIASDK_UWP_DISPATCHER)
-mfxStatus mfx_get_default_intel_gfx_api_dll_name(msdk_disp_char *pPath, size_t pathSize)
+mfxStatus mfx_get_default_intel_gfx_api_dll_name(wchar_t *pPath, size_t pathSize)
 {
     if (!pPath)
     {
@@ -102,10 +99,10 @@ mfxStatus mfx_get_default_intel_gfx_api_dll_name(msdk_disp_char *pPath, size_t p
     wcscpy(pPath, IntelGFXAPIDLLName);
     return MFX_ERR_NONE;
 #endif
-} // mfx_get_default_intel_gfx_api_dll_name(msdk_disp_char *pPath, size_t pathSize)
+} // mfx_get_default_intel_gfx_api_dll_name(wchar_t *pPath, size_t pathSize)
 #endif
 
-mfxStatus mfx_get_default_plugin_name(msdk_disp_char *pPath, size_t pathSize, eMfxImplType implType)
+mfxStatus mfx_get_default_plugin_name(wchar_t *pPath, size_t pathSize, eMfxImplType implType)
 {
     if (!pPath)
     {
@@ -117,30 +114,30 @@ mfxStatus mfx_get_default_plugin_name(msdk_disp_char *pPath, size_t pathSize, eM
 #if _MSC_VER >= 1400
     return 0 == wcscpy_s(pPath, pathSize, defaultPluginDLLName[implType & 1])
         ? MFX_ERR_NONE : MFX_ERR_UNKNOWN;
-#else
+#else    
     wcscpy(pPath, defaultPluginDLLName[implType & 1]);
     return MFX_ERR_NONE;
 #endif
 }
 
-mfxStatus mfx_get_default_audio_dll_name(msdk_disp_char *pPath, size_t pathSize, eMfxImplType implType)
+mfxStatus mfx_get_default_audio_dll_name(wchar_t *pPath, size_t pathSize, eMfxImplType implType)
 {
     if (!pPath)
     {
         return MFX_ERR_NULL_PTR;
     }
-
+    
     // there are only 2 implementation with default DLL names
 #if _MSC_VER >= 1400
     return 0 == wcscpy_s(pPath, pathSize, defaultAudioDLLName[implType & 1])
         ? MFX_ERR_NONE : MFX_ERR_UNKNOWN;
-#else
+#else    
     wcscpy(pPath, defaultAudioDLLName[implType & 1]);
     return MFX_ERR_NONE;
 #endif
 } // mfxStatus mfx_get_default_audio_dll_name(wchar_t *pPath, size_t pathSize, eMfxImplType implType)
 
-mfxModuleHandle mfx_dll_load(const msdk_disp_char *pFileName)
+mfxModuleHandle mfx_dll_load(const wchar_t *pFileName)
 {
     mfxModuleHandle hModule = (mfxModuleHandle) 0;
 
@@ -152,7 +149,7 @@ mfxModuleHandle mfx_dll_load(const msdk_disp_char *pFileName)
 #if !defined(MEDIASDK_UWP_DISPATCHER)
     // set the silent error mode
     DWORD prevErrorMode = 0;
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600)
     SetThreadErrorMode(SEM_FAILCRITICALERRORS, &prevErrorMode);
 #else
     prevErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
@@ -166,7 +163,7 @@ mfxModuleHandle mfx_dll_load(const msdk_disp_char *pFileName)
 
 #if !defined(MEDIASDK_UWP_DISPATCHER)
     // set the previous error mode
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600)
     SetThreadErrorMode(prevErrorMode, NULL);
 #else
     SetErrorMode(prevErrorMode);
@@ -200,7 +197,7 @@ bool mfx_dll_free(mfxModuleHandle handle)
 } // bool mfx_dll_free(mfxModuleHandle handle)
 
 #if !defined(MEDIASDK_UWP_DISPATCHER)
-mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName)
+mfxModuleHandle mfx_get_dll_handle(const wchar_t *pFileName)
 {
     mfxModuleHandle hModule = (mfxModuleHandle) 0;
 
@@ -212,7 +209,7 @@ mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName)
 
     // set the silent error mode
     DWORD prevErrorMode = 0;
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600)
     SetThreadErrorMode(SEM_FAILCRITICALERRORS, &prevErrorMode); 
 #else
     prevErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
@@ -220,7 +217,7 @@ mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName)
     // load the library's module
     GetModuleHandleExW(0, pFileName, (HMODULE*) &hModule);
     // set the previous error mode
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600)
     SetThreadErrorMode(prevErrorMode, NULL);
 #else
     SetErrorMode(prevErrorMode);
@@ -229,7 +226,5 @@ mfxModuleHandle mfx_get_dll_handle(const msdk_disp_char *pFileName)
 }
 #endif //!defined(MEDIASDK_UWP_DISPATCHER)
 
-
 } // namespace MFX
 
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)

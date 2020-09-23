@@ -21,7 +21,7 @@
 #define __MFXDEFS_H__
 
 #define MFX_VERSION_MAJOR 1
-#define MFX_VERSION_MINOR 32
+#define MFX_VERSION_MINOR 34
 
 // MFX_VERSION_NEXT is always +1 from last public release
 // may be enforced by MFX_VERSION_USE_LATEST define
@@ -94,11 +94,11 @@ extern "C"
   #define __UINT64  unsigned long long
 
 #ifdef _WIN32
-    #define MFX_CDECL __cdecl
-    #define MFX_STDCALL __stdcall
+  #define MFX_CDECL __cdecl
+  #define MFX_STDCALL __stdcall
 #else
-    #define MFX_CDECL
-    #define MFX_STDCALL
+  #define MFX_CDECL
+  #define MFX_STDCALL
 #endif /* _WIN32 */
 
 #define MFX_INFINITE 0xFFFFFFFF
@@ -197,7 +197,7 @@ typedef enum
 } mfxStatus;
 
 
-// Application
+// Application 
 #if defined(MFX_DISPATCHER_EXPOSED_PREFIX)
 
 #include "mfxdispatcherprefixedfunctions.h"

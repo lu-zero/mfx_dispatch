@@ -1,4 +1,4 @@
-// Copyright (c) 2013-2019 Intel Corporation
+// Copyright (c) 2013-2020 Intel Corporation
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -31,54 +31,17 @@
 #define MAX_PLUGIN_PATH 4096
 #define MAX_PLUGIN_NAME 4096
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-typedef wchar_t  msdk_disp_char;
-#define MSDK2WIDE(x) x
-
-#if _MSC_VER >= 1400
-    #define msdk_disp_char_cpy_s(to, to_size, from) wcscpy_s(to,to_size, from)
-#else
-    #define msdk_disp_char_cpy_s(to, to_size, from) wcscpy(to, from)
-#endif
-
 #if _MSC_VER < 1400
 #define wcscpy_s(to,to_size, from) wcscpy(to, from)
 #define wcscat_s(to,to_size, from) wcscat(to, from)
 #endif
 
-#else
-typedef char msdk_disp_char;
-//#define msdk_disp_char_cpy_s(to, to_size, from) strcpy(to, from)
-
-inline void msdk_disp_char_cpy_s(char * to, size_t to_size, const char * from)
-{
-    size_t source_len = strlen(from);
-    size_t num_chars = (to_size - 1) < source_len ? (to_size - 1) : source_len;
-    strncpy(to, from, num_chars);
-    to[num_chars] = 0;
-}
-
-#if defined(MFX_DISPATCHER_LOG)
-#define MSDK2WIDE(x) getWideString(x).c_str()
-
-inline std::wstring getWideString(const char * string)
-{
-    size_t len = strlen(string);
-    return std::wstring(string, string + len);
-}
-#else
-    #define MSDK2WIDE(x) x
-#endif
-
-#endif
-
-#if defined(__GNUC__) && !defined(_WIN32) && !defined(_WIN64)
-#define  sscanf_s  sscanf
-#define  swscanf_s swscanf
-#endif
-
-
 // declare library module's handle
 typedef void * mfxModuleHandle;
 
 typedef void (MFX_CDECL * mfxFunctionPointer)(void);
+
+// Tracer uses lib loading from Program Files logic (via Dispatch reg key) to make dispatcher load tracer dll.
+// With DriverStore loading put at 1st place, dispatcher loads real lib before it finds tracer dll.
+// This workaround explicitly checks tracer presence in Dispatch reg key and loads tracer dll before the search for lib in all other places.
+#define MFX_TRACER_WA_FOR_DS 1

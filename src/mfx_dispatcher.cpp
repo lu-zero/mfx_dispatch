@@ -25,19 +25,15 @@
 #include <assert.h>
 
 #include <string.h>
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-    #include <windows.h>
-    #pragma warning(disable:4355)
-#else
-    #include <dlfcn.h>
-    #include <iostream>
-#endif // defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
+#include <windows.h>
 
 #include "mfx_dxva2_device.h"
 #include "mfx/mfxvideo++.h"
 #include "mfx_vector.h"
 #include "mfx/mfxadapter.h"
 #include <algorithm>
+
+#pragma warning(disable:4355)
 
 MFX_DISP_HANDLE::MFX_DISP_HANDLE(const mfxVersion requiredVersion) :
     _mfxSession()
@@ -86,7 +82,7 @@ mfxStatus MFX_DISP_HANDLE::Close(void)
 
 } // mfxStatus MFX_DISP_HANDLE::Close(void)
 
-mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImplType reqImplType,
+mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const wchar_t *pPath, eMfxImplType reqImplType,
                                            mfxIMPL reqImpl, mfxIMPL reqImplInterface, mfxInitParam &par)
 {
     mfxStatus mfxRes = MFX_ERR_NONE;
@@ -140,7 +136,7 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
 
     {
         assert(hModule == (mfxModuleHandle)0);
-        DISPATCHER_LOG_BLOCK(("invoking LoadLibrary(%S)\n", MSDK2WIDE(pPath)));
+        DISPATCHER_LOG_BLOCK(("invoking LoadLibrary(%S)\n", pPath));
 
         // load the DLL into the memory
         hModule = MFX::mfx_dll_load(pPath);
@@ -150,9 +146,9 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
             int i;
 
             DISPATCHER_LOG_OPERATION({
-                msdk_disp_char modulePath[1024];
+                wchar_t modulePath[1024];
                 GetModuleFileNameW((HMODULE)hModule, modulePath, sizeof(modulePath)/sizeof(modulePath[0]));
-                DISPATCHER_LOG_INFO((("loaded module %S\n"), MSDK2WIDE(modulePath)))
+                DISPATCHER_LOG_INFO((("loaded module %S\n"), modulePath))
             });
 
             if (impl & MFX_IMPL_AUDIO)
@@ -163,10 +159,6 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
                     // construct correct name of the function - remove "_a" postfix
 
                     mfxFunctionPointer pProc = (mfxFunctionPointer) MFX::mfx_dll_get_addr(hModule, APIAudioFunc[i].pName);
-    #ifdef ANDROID
-                    // on Android very first call to dlsym may fail
-                    if (!pProc) pProc = (mfxFunctionPointer) MFX::mfx_dll_get_addr(hModule, APIAudioFunc[i].pName);
-    #endif
                     if (pProc)
                     {
                         // function exists in the library,
@@ -192,10 +184,6 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
                 for (i = 0; i < eVideoFuncTotal; i += 1)
                 {
                     mfxFunctionPointer pProc = (mfxFunctionPointer) MFX::mfx_dll_get_addr(hModule, APIFunc[i].pName);
-    #ifdef ANDROID
-                    // on Android very first call to dlsym may fail
-                    if (!pProc) pProc = (mfxFunctionPointer) MFX::mfx_dll_get_addr(hModule, APIFunc[i].pName);
-    #endif
                     if (pProc)
                     {
                         // function exists in the library,
@@ -218,11 +206,7 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
         }
         else
         {
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
             DISPATCHER_LOG_WRN((("can't find DLL: GetLastErr()=0x%x\n"), GetLastError()))
-#else
-            DISPATCHER_LOG_WRN((("can't find DLL: dlerror() = \"%s\"\n"), dlerror()));
-#endif
             mfxRes = MFX_ERR_UNSUPPORTED;
         }
     }
@@ -294,7 +278,7 @@ mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImpl
     loadStatus = mfxRes;
     return mfxRes;
 
-} // mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImplType implType, mfxIMPL impl)
+} // mfxStatus MFX_DISP_HANDLE::LoadSelectedDLL(const wchar_t *pPath, eMfxImplType implType, mfxIMPL impl)
 
 mfxStatus MFX_DISP_HANDLE::UnLoadSelectedDLL(void)
 {
@@ -344,6 +328,13 @@ mfxStatus MFX_DISP_HANDLE::UnLoadSelectedDLL(void)
     return mfxRes;
 
 } // mfxStatus MFX_DISP_HANDLE::UnLoadSelectedDLL(void)
+
+
+MFX_DISP_HANDLE_EX::MFX_DISP_HANDLE_EX(const mfxVersion requiredVersion)
+    : MFX_DISP_HANDLE(requiredVersion)
+    , mediaAdapterType(MFX_MEDIA_UNKNOWN)
+{}
+
 
 #if (defined(_WIN64) || defined(_WIN32)) && (MFX_VERSION >= 1031)
 static mfxStatus InitDummySession(mfxU32 adapter_n, MFXVideoSession & dummy_session)
@@ -409,6 +400,7 @@ static inline mfxI32 iGPU_priority(const void* ll, const void* rr)
 
 static void RearrangeInPriorityOrder(const mfxComponentInfo & info, MFX::MFXVector<mfxAdapterInfo> & vec)
 {
+	(void)info;
     {
         // Move iGPU to top priority
         qsort(vec.data(), vec.size(), sizeof(mfxAdapterInfo), &iGPU_priority);

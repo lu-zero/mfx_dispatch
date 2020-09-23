@@ -28,7 +28,7 @@ extern "C"
 #endif /* __cplusplus */
 
 /* Extended Buffer Ids */
-enum
+enum 
 {
     MFX_EXTBUFF_SCREEN_CAPTURE_PARAM = MFX_MAKEFOURCC('S','C','P','A')
 };
