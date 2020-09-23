@@ -98,7 +98,6 @@ typedef struct {
 } mfxExtMVCTargetViews ;
 MFX_PACK_END()
 
-
 #ifdef __cplusplus
 } // extern "C"
 #endif

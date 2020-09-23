@@ -193,7 +193,6 @@ typedef struct mfxPlugin{
 MFX_PACK_END()
 
 
-
 mfxStatus MFX_CDECL MFXVideoUSER_Register(mfxSession session, mfxU32 type, const mfxPlugin *par);
 mfxStatus MFX_CDECL MFXVideoUSER_Unregister(mfxSession session, mfxU32 type);
 mfxStatus MFX_CDECL MFXVideoUSER_GetPlugin(mfxSession session, mfxU32 type, mfxPlugin *par);

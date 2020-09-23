@@ -21,7 +21,6 @@
 #if !defined(__MFX_DXVA2_DEVICE_H)
 #define __MFX_DXVA2_DEVICE_H
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #include <windows.h>
 
 #define TOSTRING(L) #L
@@ -39,8 +38,6 @@
     #define MFX_D3D9_ENABLED
     #pragma message("\n\nATTENTION:\nin file\n\t" __FILE__ " (" STRINGIFY(__LINE__) "):\nUsing of D3D9 enabled!\n\n")
 #endif
-
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #include <mfx/mfxdefs.h>
 
@@ -90,10 +87,8 @@ protected:
     // Free DLL module
     void UnloadDLLModule(void);
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
     // Handle to the DLL library
     HMODULE m_hModule;
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
     // Number of adapters available
     mfxU32 m_numAdapters;
@@ -112,9 +107,6 @@ private:
     DXDevice(const DXDevice &);
     void operator=(const DXDevice &);
 };
-
-
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #ifdef MFX_D3D9_ENABLED
 class D3D9Device : public DXDevice
@@ -169,7 +161,6 @@ protected:
     void *m_pDXGIAdapter1;
 
 };
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 class DXVA2Device
 {

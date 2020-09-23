@@ -1,4 +1,4 @@
-// Copyright (c) 2018-2019 Intel Corporation
+// Copyright (c) 2018-2020 Intel Corporation
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -62,7 +62,7 @@ enum  {
     MFX_IMPL_VIA_D3D11    = 0x0300,
     MFX_IMPL_VIA_VAAPI    = 0x0400,
 
-    MFX_IMPL_AUDIO        = 0x8000,
+    MFX_IMPL_AUDIO                     = 0x8000,
 #if (MFX_VERSION >= MFX_VERSION_NEXT)
     MFX_IMPL_EXTERNAL_THREADING        = 0x10000,
 #endif
@@ -179,6 +179,7 @@ enum {
     MFX_PLATFORM_JASPERLAKE     = 32,
     MFX_PLATFORM_ELKHARTLAKE    = 33,
     MFX_PLATFORM_TIGERLAKE      = 40,
+    MFX_PLATFORM_KEEMBAY        = 50,
 };
 
 #if (MFX_VERSION >= 1031)

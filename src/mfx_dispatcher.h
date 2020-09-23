@@ -1,4 +1,4 @@
-// Copyright (c) 2012-2019 Intel Corporation
+// Copyright (c) 2012-2020 Intel Corporation
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,8 @@
 #define INTEL_VENDOR_ID 0x8086
 
 mfxStatus MFXQueryVersion(mfxSession session, mfxVersion *version);
+
+
 
 enum
 {
@@ -109,7 +111,7 @@ enum eMfxImplType
 enum
 {
     MFX_DISPATCHER_VERSION_MAJOR = 1,
-    MFX_DISPATCHER_VERSION_MINOR = 2
+    MFX_DISPATCHER_VERSION_MINOR = 3
 };
 
 struct _mfxSession
@@ -134,7 +136,7 @@ struct MFX_DISP_HANDLE : public _mfxSession
     ~MFX_DISP_HANDLE(void);
 
     // Load the library's module
-    mfxStatus LoadSelectedDLL(const msdk_disp_char *pPath, eMfxImplType implType, mfxIMPL impl, mfxIMPL implInterface, mfxInitParam &par);
+    mfxStatus LoadSelectedDLL(const wchar_t *pPath, eMfxImplType implType, mfxIMPL impl, mfxIMPL implInterface, mfxInitParam &par);
     // Unload the library's module
     mfxStatus UnLoadSelectedDLL(void);
 
@@ -159,7 +161,7 @@ struct MFX_DISP_HANDLE : public _mfxSession
     // Status of loaded dll
     mfxStatus loadStatus;
     // Resgistry subkey name for windows version
-    msdk_disp_char subkeyName[MFX_MAX_REGISTRY_KEY_NAME];
+    wchar_t subkeyName[MFX_MAX_REGISTRY_KEY_NAME];
     // Storage ID for windows version
     int storageID;
 
@@ -176,26 +178,37 @@ private:
 
 };
 
+// This struct extends MFX_DISP_HANDLE, we cannot extend MFX_DISP_HANDLE itself due to possible compatibility issues
+// This struct was added in dispatcher version 1.3
+// Check dispatcher handle's version when you cast session struct which came from outside of MSDK API function to this
+struct MFX_DISP_HANDLE_EX : public MFX_DISP_HANDLE
+{
+    MFX_DISP_HANDLE_EX(const mfxVersion requiredVersion);
+
+    mfxU16 mediaAdapterType;
+    mfxU16 reserved[10];
+};
+
 // declare comparison operator
 inline
 bool operator == (const mfxVersion &one, const mfxVersion &two)
 {
     return (one.Version == two.Version);
 
-} // bool operator == (const mfxVersion &one, const mfxVersion &two)
+}
 
 inline
 bool operator < (const mfxVersion &one, const mfxVersion &two)
 {
     return (one.Major < two.Major) || ((one.Major == two.Major) && (one.Minor < two.Minor));
 
-} // bool operator < (const mfxVersion &one, const mfxVersion &two)
+}
 
 inline
 bool operator <= (const mfxVersion &one, const mfxVersion &two)
 {
     return (one == two) || (one < two);
-} // bool operator <= (const mfxVersion &one, const mfxVersion &two)
+}
 
 
 //
