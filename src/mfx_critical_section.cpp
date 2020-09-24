@@ -20,8 +20,6 @@
 
 #include "mfx_critical_section.h"
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-
 #include <windows.h>
 // SDK re-declares the following functions with different call declarator.
 // We don't need them. Just redefine them to nothing.
@@ -74,5 +72,3 @@ void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
 } // void mfxLeaveCriticalSection(mfxCriticalSection *pCSection)
 
 } // namespace MFX
-
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)

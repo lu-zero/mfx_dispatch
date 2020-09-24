@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #define INITGUID
 #include <d3d9.h>
 #include <dxgi.h>
@@ -99,23 +98,19 @@ void DXDevice::LoadDLLModule(const wchar_t *pModuleName)
 #if !defined(MEDIASDK_UWP_DISPATCHER)
     DWORD prevErrorMode = 0;
     // set the silent error mode
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600)
     SetThreadErrorMode(SEM_FAILCRITICALERRORS, &prevErrorMode); 
 #else
     prevErrorMode = SetErrorMode(SEM_FAILCRITICALERRORS);
 #endif
 #endif // !defined(MEDIASDK_UWP_DISPATCHER)
 
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
     // load specified library
     m_hModule = LoadLibraryExW(pModuleName, NULL, 0);
-#else
-    m_hModule = (HMODULE)(intptr_t) 0x1234; // fake value, we can't load system DLLs
-#endif
 
 #if !defined(MEDIASDK_UWP_DISPATCHER)
     // set the previous error mode
-#if (_WIN32_WINNT >= 0x0600) && !(__GNUC__)
+#if (_WIN32_WINNT >= 0x0600)
     SetThreadErrorMode(prevErrorMode, NULL);
 #else
     SetErrorMode(prevErrorMode);
@@ -128,9 +123,7 @@ void DXDevice::UnloadDLLModule(void)
 {
     if (m_hModule)
     {
-#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
         FreeLibrary(m_hModule);
-#endif
         m_hModule = (HMODULE) 0;
     }
 
@@ -452,6 +445,7 @@ bool DXVA2Device::InitD3D9(const mfxU32 adapterNum)
         return false;
     }
 
+
     m_numAdapters = d3d9Device.GetAdapterCount();
 
     // check if the application is under Remote Desktop
@@ -571,4 +565,4 @@ mfxU32 DXVA2Device::GetAdapterCount(void) const
     return m_numAdapters;
 
 } // mfxU32 DXVA2Device::GetAdapterCount(void) const
-#endif
+

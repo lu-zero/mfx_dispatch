@@ -6,10 +6,10 @@
 // to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 // copies of the Software, and to permit persons to whom the Software is
 // furnished to do so, subject to the following conditions:
-//
+// 
 // The above copyright notice and this permission notice shall be included in all
 // copies or substantial portions of the Software.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 // IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 // FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -206,7 +206,6 @@ typedef struct {
     } *MB;
 } mfxExtFeiEncMBCtrl;
 MFX_PACK_END()
-
 
 /* 1 ENC_PAK output */
 /* Buffer holds 32 MVs per MB. MVs are located in zigzag scan order.
@@ -533,7 +532,6 @@ typedef struct {
 } mfxExtFeiCodingOption;
 MFX_PACK_END()
 
-
 /* 1 functions */
 typedef enum {
     MFX_FEI_FUNCTION_PREENC     =1,
@@ -576,7 +574,6 @@ typedef struct {
     mfxU16 reserved[57];
 } mfxExtFeiParam;
 MFX_PACK_END()
-
 
 #ifdef __cplusplus
 } /* extern "C" */

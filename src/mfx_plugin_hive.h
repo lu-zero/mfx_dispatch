@@ -32,23 +32,23 @@ struct MFX_DISP_HANDLE;
 
 namespace MFX {
 
-    inline bool operator == (const mfxPluginUID &lhs, const mfxPluginUID & rhs)
+    inline bool operator == (const mfxPluginUID &lhs, const mfxPluginUID & rhs) 
     {
         return !memcmp(lhs.Data, rhs.Data, sizeof(mfxPluginUID));
     }
-
-    inline bool operator != (const mfxPluginUID &lhs, const mfxPluginUID & rhs)
+    
+    inline bool operator != (const mfxPluginUID &lhs, const mfxPluginUID & rhs) 
     {
         return !(lhs == rhs);
     }
-#if defined(_WIN32) || defined(__CYGWIN__)
+#ifdef _WIN32
     //warning C4351: new behavior: elements of array 'MFX::PluginDescriptionRecord::sName' will be default initialized
     #pragma warning (disable: 4351)
 #endif
-    class PluginDescriptionRecord :  public mfxPluginParam
+    class PluginDescriptionRecord :  public mfxPluginParam 
     {
     public:
-        msdk_disp_char sPath[MAX_PLUGIN_PATH];
+        wchar_t sPath[MAX_PLUGIN_PATH];
         char sName[MAX_PLUGIN_NAME];
         //used for FS plugins that has poor description
         bool onlyVersionRegistered;
@@ -65,12 +65,12 @@ namespace MFX {
 
     typedef MFXVector<PluginDescriptionRecord> MFXPluginStorage;
 
-    class  MFXPluginStorageBase : public MFXPluginStorage
+    class  MFXPluginStorageBase : public MFXPluginStorage 
     {
     protected:
         mfxVersion mCurrentAPIVersion;
     protected:
-        MFXPluginStorageBase(mfxVersion currentAPIVersion)
+        MFXPluginStorageBase(mfxVersion currentAPIVersion) 
             : mCurrentAPIVersion(currentAPIVersion)
         {
         }
@@ -87,10 +87,9 @@ namespace MFX {
     class MFXPluginsInHive : public MFXPluginStorageBase
     {
     public:
-        MFXPluginsInHive(int mfxStorageID, const msdk_disp_char *msdkLibSubKey, mfxVersion currentAPIVersion);
+        MFXPluginsInHive(int mfxStorageID, const wchar_t *msdkLibSubKey, mfxVersion currentAPIVersion);
     };
 
-#if defined(MEDIASDK_USE_CFGFILES) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
     //plugins are loaded from FS close to executable
     class MFXPluginsInFS : public MFXPluginStorageBase
     {
@@ -100,9 +99,8 @@ namespace MFX {
         MFXPluginsInFS(mfxVersion currentAPIVersion);
     private:
         bool ParseFile(FILE * f, PluginDescriptionRecord & des);
-        bool ParseKVPair( msdk_disp_char *key, msdk_disp_char * value, PluginDescriptionRecord & des);
+        bool ParseKVPair( wchar_t *key, wchar_t * value, PluginDescriptionRecord & des);
     };
-#endif //#if defined(MEDIASDK_USE_CFGFILES) || (!defined(MEDIASDK_UWP_LOADER) && !defined(MEDIASDK_UWP_PROCTABLE))
 
 #endif //#if !defined(MEDIASDK_UWP_DISPATCHER)
 

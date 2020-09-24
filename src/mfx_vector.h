@@ -168,7 +168,6 @@ namespace MFX
 
             mRecords = newRecords;
             mNrecords = i + 1;
-
         }
         void erase (iterator at)
         {

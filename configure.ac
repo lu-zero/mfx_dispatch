@@ -1,6 +1,6 @@
 AC_PREREQ([2.53])
 
-AC_INIT([libmfx], [1.32])
+AC_INIT([libmfx], [1.34])
 AC_CONFIG_SRCDIR([src/mfx_dispatcher.cpp])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
@@ -15,13 +15,13 @@ AS_CASE([${host_os}],
     [*mingw*], [
         AC_DEFINE([MFX_HAVE_WINDOWS])
         AM_CONDITIONAL([WINDOWS], [true])
-        DLLIB=""
+        DLLIB="-lole32 -luuid"
     ],
     [*cygwin*], [
         AC_DEFINE([MFX_HAVE_WINDOWS])
         AC_DEFINE([_MAX_PATH], [MAX_PATH])
         AM_CONDITIONAL([WINDOWS], [true])
-        DLLIB=""
+        DLLIB="-lole32 -luuid"
     ],
     [AC_MSG_ERROR([${host_os} not supported.])]
 )

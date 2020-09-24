@@ -21,8 +21,6 @@
 #if !defined(__MFX_WIN_REG_KEY_H)
 #define __MFX_WIN_REG_KEY_H
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
-
 #include <windows.h>
 #include "mfx/mfxplugin.h"
 #include "mfx_dispatcher_log.h"
@@ -102,7 +100,5 @@ inline bool QueryKey<bool>(WinRegKey & key, const wchar_t *pValueName, bool &dat
 
 } // namespace MFX
 #endif // #if !defined(MEDIASDK_UWP_DISPATCHER)
-
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #endif // __MFX_WIN_REG_KEY_H

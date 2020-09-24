@@ -81,7 +81,6 @@ enum
 //is a vital if mediasdk wont use
 #define DISPATCHER_LOG_HEAP_SINGLETONES
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 // guid for all dispatcher events
 #define DISPATCHER_LOG_EVENT_GUID L"{EB0538CC-4FEE-484d-ACEE-1182E9F37A57}"
 
@@ -91,8 +90,6 @@ enum
 //puts a sink into listeners list
 //#define DISPATCHER_LOG_REGISTER_FILE_WRITER
 #define DISPACTHER_LOG_FW_PATH "c:\\dispatcher.log"
-
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -105,7 +102,6 @@ public:
     virtual void Write(int level, int opcode, const char * msg, va_list argptr) = 0;
 };
 
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #if  DISPATCHER_LOG_USE_FORMATING
 
     #define DISPATCHER_LOG(lvl, opcode, str)\
@@ -125,10 +121,6 @@ public:
 #endif//DISPATCHER_LOG_USE_FORMATING
 
 #define DISPATCHER_LOG_OPERATION(operation) operation
-#else
-#define DISPATCHER_LOG(lvl, opcode, str)
-#define DISPATCHER_LOG_OPERATION(operation)
-#endif
 
 #define __name_from_line( name, line ) name ## line
 #define _name_from_line( name , line) __name_from_line( name, line ) 
@@ -227,7 +219,6 @@ struct DispatchLogBlockHelper
 };
 
 //----utility sinks-----
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 #if defined(DISPATCHER_LOG_REGISTER_EVENT_PROVIDER)
 class ETWHandlerFactory
     : public DSSingleTone<ETWHandlerFactory>
@@ -244,7 +235,6 @@ protected:
     ETWHandlerFactory(){}
 };
 #endif
-#endif // #if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
 
 #if defined(DISPATCHER_LOG_REGISTER_FILE_WRITER)
 class FileSink 
@@ -267,11 +257,7 @@ private:
     FILE * m_hdl;
     FileSink(const std::string & log_file)
     {
-#if defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__)
         fopen_s(&m_hdl, log_file.c_str(), "a");
-#else
-        m_hdl = fopen(log_file.c_str(), "a");
-#endif
     }
     
 };

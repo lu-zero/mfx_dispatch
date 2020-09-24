@@ -48,7 +48,7 @@ enum {
     MFX_PROFILE_AAC_PS          =29,
 
     /*MPEG AUDIO*/
-    MFX_AUDIO_MPEG1_LAYER1      =0x00000110,
+    MFX_AUDIO_MPEG1_LAYER1      =0x00000110, 
     MFX_AUDIO_MPEG1_LAYER2      =0x00000120,
     MFX_AUDIO_MPEG1_LAYER3      =0x00000140,
     MFX_AUDIO_MPEG2_LAYER1      =0x00000210,
@@ -85,7 +85,7 @@ enum{
 };
 
 /*AAC encoder stereo mode*/
-enum
+enum 
 {
     MFX_AUDIO_AAC_MONO=            0,
     MFX_AUDIO_AAC_LR_STEREO=       1,
@@ -104,9 +104,9 @@ typedef struct {
     mfxU16  NumChannel;
     mfxU16  BitPerSample;
 
-    mfxU16                reserved1[22];
+    mfxU16                reserved1[22]; 
 
-    union {
+    union {    
         struct {   /* AAC Decoding Options */
             mfxU16       FlagPSSupportLev;
             mfxU16       Layer;
@@ -116,7 +116,7 @@ typedef struct {
         struct {   /* AAC Encoding Options */
             mfxU16       OutputFormat;
             mfxU16       StereoMode;
-            mfxU16       reserved2[61];
+            mfxU16       reserved2[61]; 
         };
     };
 } mfxAudioInfoMFX;
@@ -126,7 +126,7 @@ MFX_PACK_BEGIN_STRUCT_W_PTR()
 typedef struct {
     mfxU16  AsyncDepth;
     mfxU16  Protected;
-    mfxU16  reserved[14];
+    mfxU16  reserved[14]; 
 
     mfxAudioInfoMFX   mfx;
     mfxExtBuffer**    ExtParam;
@@ -149,7 +149,7 @@ typedef struct {
     mfxU16  NumChannels;
     mfxU32  SampleFrequency;
     mfxU16  BitPerSample;
-    mfxU16  reserved1[7];
+    mfxU16  reserved1[7]; 
 
     mfxU8*  Data;
     mfxU32  reserved2;
