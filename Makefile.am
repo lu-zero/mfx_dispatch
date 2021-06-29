@@ -87,6 +87,9 @@ pkginclude_HEADERS = \
 	mfx/mfxvstructures.h				\
 	mfx/mfxbrc.h						\
 	mfx/mfxfei.h						\
-	mfx/mfxfeihevc.h
+	mfx/mfxfeihevc.h					\
+	mfx/ts_ext_buffers_decl.h			\
+	mfx/ts_struct_decl.h				\
+	mfx/ts_typedef.h
 
 pkgincludedir = $(includedir)/mfx

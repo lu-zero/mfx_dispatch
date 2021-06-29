@@ -441,13 +441,18 @@ static inline bool QueryAdapterInfo(mfxU32 adapter_n, mfxU32& VendorID, mfxU32& 
 {
     MFX::DXVA2Device dxvaDevice;
 
-    if (!dxvaDevice.InitD3D9(adapter_n) && !dxvaDevice.InitDXGI1(adapter_n))
+    if (!dxvaDevice.InitDXGI1(adapter_n))
         return false;
 
     VendorID = dxvaDevice.GetVendorID();
     DeviceID = dxvaDevice.GetDeviceID();
 
     return true;
+}
+
+static inline mfxU32 MakeVersion(mfxU16 major, mfxU16 minor)
+{
+    return major * 1000 + minor;
 }
 
 mfxStatus MFXQueryAdaptersDecode(mfxBitstream* bitstream, mfxU32 codec_id, mfxAdaptersInfo* adapters)
@@ -509,7 +514,9 @@ mfxStatus MFXQueryAdaptersDecode(mfxBitstream* bitstream, mfxU32 codec_id, mfxAd
         if (sts != MFX_ERR_NONE)
             continue;
 
-        if (apiVersion.Major >= 1 && apiVersion.Minor >= 19)
+        mfxU32 version = MakeVersion(apiVersion.Major, apiVersion.Minor);
+
+        if (version >= 1019)
         {
             sts = MFXVideoCORE_QueryPlatform(dummy_session.operator mfxSession(), &info.Platform);
 
@@ -605,7 +612,9 @@ mfxStatus MFXQueryAdapters(mfxComponentInfo* input_info, mfxAdaptersInfo* adapte
         if (sts != MFX_ERR_NONE)
             continue;
 
-        if (apiVersion.Major >= 1 && apiVersion.Minor >= 19)
+        mfxU32 version = MakeVersion(apiVersion.Major, apiVersion.Minor);
+
+        if (version >= 1019)
         {
             sts = MFXVideoCORE_QueryPlatform(dummy_session.operator mfxSession(), &info.Platform);
 
