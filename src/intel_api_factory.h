@@ -25,8 +25,8 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-HRESULT APIENTRY InitialiseMediaSession(_Out_ HANDLE* handle, _In_ LPVOID lpParam, _Reserved_ LPVOID lpReserved);
-HRESULT APIENTRY DisposeMediaSession(_In_ const HANDLE handle);
+HRESULT InitialiseMediaSession(_Out_ HANDLE* handle, _In_ LPVOID lpParam, _Reserved_ LPVOID lpReserved);
+HRESULT DisposeMediaSession(_In_ const HANDLE handle);
 
 #ifdef __cplusplus
 }
