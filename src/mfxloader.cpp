@@ -452,7 +452,24 @@ mfxStatus MFXVideoUSER_Load(mfxSession session, const mfxPluginUID *uid, mfxU32 
       if (MFX::g_GlobalCtx.m_plugins.empty()) {
         // Parsing plugin configuration file and loading information of
         // _all_ plugins registered on the system.
+#if defined(__linux__)
+        // Hardcode common plugins paths for most linux distros in case of
+        // the legacy mfxdispatcher is configured to static build.
+        const char *plugins_paths[4] = { "/plugins.cfg",
+                                         "/usr/share/mfx/plugins.cfg",
+                                         "/usr/local/share/mfx/plugins.cfg",
+                                         "/opt/intel/mediasdk/plugins/plugins.cfg" };
+        for (int i = 0; i < sizeof(plugins_paths) / sizeof(plugins_paths[0]); i++) {
+          FILE *fp = NULL;
+          if ((fp = fopen(plugins_paths[i], "r")) != NULL) {
+            fclose(fp);
+            parse(plugins_paths[i], MFX::g_GlobalCtx.m_plugins);
+            break;
+          }
+        }
+#else
         parse(MFX_PLUGINS_CONF_DIR "/plugins.cfg", MFX::g_GlobalCtx.m_plugins);
+#endif
       }
 
       // search for plugin description
