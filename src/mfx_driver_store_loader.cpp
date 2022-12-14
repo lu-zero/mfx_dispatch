@@ -24,6 +24,10 @@
 #include "mfx_dispatcher_log.h"
 #include "mfx_load_dll.h"
 
+// If not add this, building ffmpeg in vcpkg will fail missing StringFromGUID2 symbol
+// As the ffmpeg building doesn't link Ole32
+#pragma comment(lib, "Ole32.lib")
+
 namespace MFX
 {
 
