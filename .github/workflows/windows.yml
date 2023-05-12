@@ -13,12 +13,10 @@ jobs:
       CXX: ccache g++
     steps:
       - uses: actions/checkout@v2.0.0
-      - name: Setup ccache dir
-        run: Write-Output "::set-env name=CCACHE_DIR::$PWD/.ccache"
 
       - name: Cache ccache
         id: cache-msys64
-        uses: actions/cache@v2
+        uses: actions/cache@v3
         with:
           path: .ccache
           key: ${{ runner.os }}-msys64-${{ hashFiles('**/*.c') }}
