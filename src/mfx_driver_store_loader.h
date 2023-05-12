@@ -35,6 +35,13 @@
 #endif
 #endif
 
+#if defined(__MINGW64_VERSION_MAJOR) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+// mingw-w64 doesn't set these types for WINAPI_PARTITION_APP
+typedef DWORD      DEVINST;
+typedef DEVINST    *PDEVINST;
+typedef ULONG      REGDISPOSITION;
+#endif
+
 namespace MFX
 {
 
