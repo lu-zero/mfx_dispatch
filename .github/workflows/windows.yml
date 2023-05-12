@@ -12,7 +12,7 @@ jobs:
       CC: ccache gcc
       CXX: ccache g++
     steps:
-      - uses: actions/checkout@v2.0.0
+      - uses: actions/checkout@v3
 
       - name: Cache ccache
         id: cache-msys64
