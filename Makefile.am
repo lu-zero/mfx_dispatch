@@ -42,6 +42,7 @@ libmfx_la_LIBADD = $(DLLIB) $(LIBVA_DRM_LIBS) $(LIBVA_X11_LIBS)
 libmfx_la_CPPFLAGS = $(LIBVA_DRM_CFLAGS) $(LIBVA_X11_CFLAGS) $(AM_CPPFLAGS)
 
 if WINDOWS_STORE
+libmfx_la_SOURCES += src/mfx_dispatcher_uwp.cpp
 libintel_gfx_api-x86.a: src/intel_gfx_api-x86.def
 	$(DLLTOOL) --as=as --output-lib $@ --input-def $< --as-flags=--32 -m i386 
 libintel_gfx_api-x64.a: src/intel_gfx_api-x64.def
