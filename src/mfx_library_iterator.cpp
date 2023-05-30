@@ -159,6 +159,7 @@ void MFXLibraryIterator::Release(void)
 
 } // void MFXLibraryIterator::Release(void)
 
+#if !defined(MEDIASDK_UWP_DISPATCHER)
 DECLSPEC_NOINLINE HMODULE GetThisDllModuleHandle()
 {
   HMODULE hDll = NULL;
@@ -168,6 +169,7 @@ DECLSPEC_NOINLINE HMODULE GetThisDllModuleHandle()
                       reinterpret_cast<LPCWSTR>(&GetThisDllModuleHandle), &hDll);
   return hDll;
 }
+#endif
 
 // wchar_t* sImplPath must be allocated with size not less then msdk_disp_path_len
 bool GetImplPath(int storageID, wchar_t* sImplPath)
@@ -180,6 +182,7 @@ bool GetImplPath(int storageID, wchar_t* sImplPath)
     case MFX_APP_FOLDER:
         hModule = 0;
         break;
+#if !defined(MEDIASDK_UWP_DISPATCHER)
     case MFX_PATH_MSDK_FOLDER:
         hModule = GetThisDllModuleHandle();
         HMODULE exeModule = GetModuleHandleW(NULL);
@@ -187,6 +190,7 @@ bool GetImplPath(int storageID, wchar_t* sImplPath)
         if (!hModule || !exeModule || hModule == exeModule)
             return false;
         break;
+#endif
     }
 
     DWORD nSize = 0;

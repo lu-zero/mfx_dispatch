@@ -79,6 +79,7 @@ DriverStoreLoader::~DriverStoreLoader(void)
 
 bool DriverStoreLoader::GetDriverStorePath(wchar_t * path, DWORD dwPathSize, mfxU32 deviceID)
 {
+#if !defined(MEDIASDK_UWP_DISPATCHER)
     if (path == NULL || dwPathSize == 0)
     {
         return false;
@@ -176,6 +177,7 @@ bool DriverStoreLoader::GetDriverStorePath(wchar_t * path, DWORD dwPathSize, mfx
             }
         }
     }
+#endif // MEDIASDK_UWP_DISPATCHER
 
     DISPATCHER_LOG_INFO(("DriverStore path isn't found\n"));
     return false;
