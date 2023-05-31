@@ -35,11 +35,25 @@
 #endif
 #endif
 
-#if defined(__MINGW64_VERSION_MAJOR) && WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
-// mingw-w64 doesn't set these types for WINAPI_PARTITION_APP
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+// these are not defined for WINAPI_PARTITION_APP
 typedef DWORD      DEVINST;
 typedef DEVINST    *PDEVINST;
 typedef ULONG      REGDISPOSITION;
+#include <initguid.h>
+DEFINE_GUID( GUID_DEVCLASS_DISPLAY,             0x4d36e968L, 0xe325, 0x11ce, 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18 );
+
+#if defined(__MINGW64_VERSION_MAJOR)
+// mingw-w64 doesn't set these types for WINAPI_PARTITION_APP
+#define CR_SUCCESS                     (0x00)
+#define CR_BUFFER_SMALL                (0x1A)
+#define CM_LOCATE_DEVNODE_NORMAL       (0x00000000)
+#define CM_REGISTRY_SOFTWARE           (0x00000001)
+#define CM_GETIDLIST_FILTER_PRESENT    (0x00000100)
+#define CM_GETIDLIST_FILTER_CLASS      (0x00000200)
+#define RegDisposition_OpenExisting    (0x00000001)
+#endif
+
 #endif
 
 namespace MFX
